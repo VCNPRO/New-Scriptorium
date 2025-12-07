@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, Button, Badge } from './ui';
 import { Icons } from './Icons';
 import { Manuscript, AnalysisData, VisualAnalysis, RelationMatch } from '../types';
-import { transcribeManuscript, analyzeTranscription, translateText } from '../services/geminiService';
+import { aiService } from '../src/services/apiService';
 
 interface TranscriberProps {
   initialManuscript?: Manuscript;
@@ -180,26 +180,26 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
     if (!image) return;
     setIsProcessing(true);
     try {
-      // Q1, Q5, Q7: Transcribe & Visual Scan
-      const transResult = await transcribeManuscript(image);
+      // Q1, Q5, Q7: Transcribe & Visual Scan (usando backend seguro)
+      const transResult = await aiService.transcribe(image);
       setText(transResult.text);
       setVisualAnalysis(transResult.visual);
 
       // AUTOMATIC ANALYSIS (Q11 Language, Typology, etc.)
       if (transResult.text) {
-          const anaResult = await analyzeTranscription(transResult.text);
+          const anaResult = await aiService.analyze(transResult.text);
           setAnalysis(anaResult);
-          
+
           // Compute relations immediately
           const newRelations = calculateRelations(anaResult, transResult.text);
-          
+
           // Save complete state
           saveManuscript(transResult.text, anaResult, transResult.visual, translatedText, newRelations);
       }
 
     } catch (err) {
       console.error(err);
-      alert("Error procesando el manuscrito.");
+      alert("Error procesando el manuscrito: " + (err instanceof Error ? err.message : 'Error desconocido'));
     } finally {
       setIsProcessing(false);
     }
@@ -209,15 +209,15 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
     if (!text) return;
     setIsProcessing(true);
     try {
-      // Manual trigger backup
-      const result = await analyzeTranscription(text);
+      // Manual trigger backup (usando backend seguro)
+      const result = await aiService.analyze(text);
       setAnalysis(result);
-      const newRelations = calculateRelations(result, text); 
+      const newRelations = calculateRelations(result, text);
       setActiveTab('diplomatics');
-      
+
       saveManuscript(text, result, visualAnalysis, translatedText, newRelations);
     } catch (err) {
-        alert("Error analizando el texto.");
+        alert("Error analizando el texto: " + (err instanceof Error ? err.message : 'Error desconocido'));
     } finally {
       setIsProcessing(false);
     }
@@ -226,10 +226,15 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
   const handleTranslate = async () => {
       if (!text) return;
       setIsProcessing(true);
-      const translation = await translateText(text);
-      setTranslatedText(translation);
-      saveManuscript(text, analysis, visualAnalysis, translation, relations);
-      setIsProcessing(false);
+      try {
+        const result = await aiService.translate(text, 'es');
+        setTranslatedText(result.translation);
+        saveManuscript(text, analysis, visualAnalysis, result.translation, relations);
+      } catch (err) {
+        alert("Error traduciendo el texto: " + (err instanceof Error ? err.message : 'Error desconocido'));
+      } finally {
+        setIsProcessing(false);
+      }
   };
 
   const saveManuscript = (t: string, a: AnalysisData | null, v: VisualAnalysis | null, tr: string, rel: RelationMatch[]) => {
