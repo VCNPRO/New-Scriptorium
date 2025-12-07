@@ -1,0 +1,46 @@
+import React from 'react';
+import { 
+  Feather, 
+  BookOpen, 
+  Search, 
+  Save, 
+  Upload, 
+  FileText, 
+  Activity, 
+  LayoutDashboard,
+  Settings,
+  ChevronRight,
+  Loader2,
+  BrainCircuit,
+  ScrollText,
+  ScanText,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Move,
+  HelpCircle,
+  Info
+} from 'lucide-react';
+
+export const Icons = {
+  Quill: Feather,
+  Library: BookOpen,
+  Search: Search,
+  Save: Save,
+  Upload: Upload,
+  File: FileText,
+  Analysis: Activity,
+  Dashboard: LayoutDashboard,
+  Settings: Settings,
+  ArrowRight: ChevronRight,
+  Spinner: Loader2,
+  AI: BrainCircuit,
+  Manuscript: ScrollText,
+  Scan: ScanText,
+  ZoomIn: ZoomIn,
+  ZoomOut: ZoomOut,
+  Reset: RotateCcw,
+  Move: Move,
+  Help: HelpCircle,
+  Info: Info
+};

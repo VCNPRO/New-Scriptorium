@@ -1,0 +1,5 @@
+{
+  "name": "Scriptorium: Inteligencia de Manuscritos",
+  "description": "Herramienta profesional para archiveros para transcribir, analizar y extraer datos de manuscritos históricos usando Google Gemini AI.",
+  "requestFramePermissions": []
+}
