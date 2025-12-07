@@ -1,7 +1,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AnalysisData, VisualAnalysis } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
+
+if (!API_KEY) {
+  throw new Error('VITE_GOOGLE_API_KEY no está configurada. Por favor, configura la variable de entorno en Vercel.');
+}
+
+const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 // Using gemini-3-pro-preview for best handwriting recognition (vision capabilities)
 const MODEL_NAME = 'gemini-3-pro-preview';

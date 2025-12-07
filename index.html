@@ -4,65 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Scriptorium | Análisis de Manuscritos</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <!-- Importing Classic Fonts: Cinzel (Headers), Playfair Display (Subheaders), Merriweather (Body), Cormorant Garamond (Manuscript Text) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Merriweather:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              wood: {
-                800: '#3E2723', // Dark Mahogany
-                900: '#281712', // Deep Oak
-              },
-              parchment: {
-                100: '#FDFBF7', // Clean Paper
-                200: '#F5F1E6', // Aged Paper
-                300: '#E8E0D2', // Darker Parchment
-              },
-              copper: {
-                400: '#CD7F32',
-                500: '#B87333', // Polished Copper
-                600: '#8B4513', // Bronze/Saddle Brown
-              },
-              ink: {
-                900: '#1A1A1A', // Archival Ink
-              }
-            },
-            fontFamily: {
-              serif: ['Merriweather', 'serif'],
-              display: ['Cinzel', 'serif'],
-              subhead: ['Playfair Display', 'serif'],
-              script: ['Cormorant Garamond', 'serif'],
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      body {
-        background-color: #281712;
-        color: #1A1A1A;
-      }
-      /* Custom Scrollbar for a cleaner look */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #3E2723; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #B87333; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #CD7F32; 
-      }
-    </style>
   </head>
   <body>
     <div id="root"></div>
