@@ -9,9 +9,10 @@ if (!API_KEY) {
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY || '' });
-    const MODEL_NAME = 'gemini-1.5-pro-latest';
+        const MODEL_NAME = 'gemini-1.5-pro-latest';
     
-    const response = await ai.getGenerativeModel({ model: MODEL_NAME }).generateContent({
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
       contents: [{
         parts: [
           {
@@ -39,12 +40,9 @@ const ai = new GoogleGenAI({ apiKey: API_KEY || '' });
           },
         ],
       }],
-      // config: {
-      //   responseMimeType: "application/json" // This is often inferred, and can cause issues if model doesn't support it for multipart
-      // }
     });
 
-    const responseText = response.response.text();
+    const responseText = response.text();
     if (!responseText) {
       throw new Error('La respuesta de la IA estaba vacía.');
     }
