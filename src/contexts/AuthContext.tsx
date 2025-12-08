@@ -55,9 +55,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error('Error verificando autenticación:', error);
+      // Si hay error de red o backend, asumimos que no hay autenticación
       setUser(null);
       setToken(null);
     } finally {
+      // IMPORTANTE: Siempre marcar como no-loading para que la app cargue
       setIsLoading(false);
     }
   };
