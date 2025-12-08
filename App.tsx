@@ -1,63 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { Transcriber } from './components/Transcriber';
 import { UserGuide } from './components/UserGuide';
 import { Icons } from './components/Icons';
 import { ViewState, Manuscript } from './types';
-import { useAuth } from './src/contexts/AuthContext';
-import { AuthModal } from './src/components/AuthModal';
-import { manuscriptService } from './src/services/apiService';
 
 function App() {
-  const { isAuthenticated, isLoading, user } = useAuth();
   const [view, setView] = useState<ViewState>(ViewState.DASHBOARD);
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
   const [selectedManuscript, setSelectedManuscript] = useState<Manuscript | undefined>(undefined);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Cargar manuscritos desde backend cuando el usuario esté autenticado
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadManuscripts();
-    }
-  }, [isAuthenticated]);
-
-  const loadManuscripts = async () => {
-    try {
-      const response = await manuscriptService.list();
-      setManuscripts(response.manuscripts || []);
-    } catch (error) {
-      console.error('Error cargando manuscritos:', error);
-    }
+  const handleSaveManuscript = (m: Manuscript) => {
+    setManuscripts(prev => {
+      const exists = prev.find(p => p.id === m.id);
+      if (exists) {
+        return prev.map(p => p.id === m.id ? m : p);
+      }
+      return [m, ...prev];
+    });
   };
-
-  const handleSaveManuscript = async (m: Manuscript) => {
-    try {
-      // Guardar en backend
-      await manuscriptService.create({
-        title: m.title,
-        imageUrl: m.imageUrl,
-        transcription: m.transcription,
-        translation: m.translation,
-        analysis: m.analysis,
-        visualAnalysis: m.visualAnalysis,
-      });
-
-      // Recargar manuscritos desde backend
-      await loadManuscripts();
-    } catch (error) {
-      console.error('Error guardando manuscrito:', error);
-      alert('Error al guardar el manuscrito. Por favor intenta de nuevo.');
-    }
-  };
-
-  // Mostrar modal de autenticación si no está autenticado
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      setShowAuthModal(true);
-    }
-  }, [isLoading, isAuthenticated]);
 
   const navItemClass = (active: boolean) => `
     w-full flex items-center gap-3 px-4 py-3 rounded-sm transition-all duration-200 cursor-pointer
@@ -66,24 +28,8 @@ function App() {
       : 'text-parchment-300 hover:bg-wood-800 hover:text-parchment-100 border border-transparent'}
   `;
 
-  // Mostrar loading mientras se verifica autenticación
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-parchment-200">
-        <div className="text-center">
-          <Icons.Spinner className="w-8 h-8 animate-spin text-copper-600 mx-auto mb-4" />
-          <p className="font-display text-wood-900">Cargando...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-screen bg-parchment-200 text-wood-900 font-serif overflow-hidden">
-      {/* Modal de Autenticación */}
-      {showAuthModal && !isAuthenticated && (
-        <AuthModal onClose={() => setShowAuthModal(false)} />
-      )}
       
       {/* Sidebar - Wood Texture */}
       <aside 
