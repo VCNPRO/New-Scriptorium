@@ -9,7 +9,7 @@ if (!API_KEY) {
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY || '' });
-        const MODEL_NAME = 'gemini-1.5-pro-latest';
+        const MODEL_NAME = 'gemini-pro-vision';
     
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
