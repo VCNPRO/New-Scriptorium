@@ -68,27 +68,19 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
 
   const onWheel = (e: React.WheelEvent) => {
     if (!image) return;
-    // Optional: Only zoom if Ctrl is pressed, or always zoom. Let's act like Google Maps (always zoom)
-    // but prevent default page scroll if inside container.
-    // e.stopPropagation(); 
     if (e.ctrlKey || e.metaKey) {
         const delta = e.deltaY > 0 ? -0.1 : 0.1;
         handleZoom(delta);
     }
   };
 
-  // Helper to detect physical damage for alerts
   const getPhysicalDamageAlert = (va: VisualAnalysis | null): string | null => {
     if (!va || !va.physicalCondition) return null;
     const condition = va.physicalCondition.toLowerCase();
     const safeStates = ['normal', 'bueno', 'intacto', 'sin daños', 'perfecto', 'excelente'];
-    
-    // If it DOESN'T contain safe words OR contains danger words
     const dangerWords = ['mancha', 'rotura', 'roto', 'daño', 'deterioro', 'humedad', 'moho', 'quemadura', 'rasgadura', 'polilla', 'desvanecido', 'ilegible', 'agujero'];
-    
     const isSafe = safeStates.some(safe => condition.includes(safe));
     const isDanger = dangerWords.some(danger => condition.includes(danger));
-
     if (!isSafe || isDanger) {
         return `Estado físico: ${va.physicalCondition}`;
     }
@@ -97,22 +89,16 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
 
   const physicalAlert = getPhysicalDamageAlert(visualAnalysis);
 
-  // Q10: Automatic Relation Detection Logic
   const calculateRelations = (currentAnalysis: AnalysisData | null, currentText: string): RelationMatch[] => {
     if (!currentAnalysis) return [];
-
     const matches: RelationMatch[] = [];
-
     existingManuscripts.forEach(other => {
-        if (other.id === initialManuscript?.id) return; // Don't compare with self if editing
-        
+        if (other.id === initialManuscript?.id) return;
         let score = 0;
         let reasons: string[] = [];
         let type: RelationMatch['reason'] = 'same_expediente';
 
-        // 1. DUPLICATE DETECTION (Q9)
-        // Simple fuzzy match on title or very high text overlap
-        if (other.title === currentAnalysis.titleSuggestion) {
+        if (other.title === currentAnalysis.titleSuggestion?.value) {
             score += 50;
             reasons.push("Título idéntico");
             type = 'duplicate';
@@ -123,29 +109,19 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
             type = 'duplicate';
         }
 
-        if (type !== 'duplicate') {
-            // 2. SAME EXPEDIENTE / SERIES (Q10)
-            if (other.analysis) {
-                // Shared Entities
-                const sharedPeople = other.analysis.entities.people.filter(p => currentAnalysis.entities.people.includes(p));
-                const sharedOrgs = other.analysis.entities.organizations.filter(o => currentAnalysis.entities.organizations.includes(o));
-                
-                if (sharedPeople.length > 0) {
-                    score += (sharedPeople.length * 10);
-                    reasons.push(`Personas compartidas: ${sharedPeople.slice(0, 2).join(', ')}`);
-                }
-                if (sharedOrgs.length > 0) {
-                    score += (sharedOrgs.length * 5);
-                    reasons.push(`Organizaciones comunes`);
-                }
+        if (type !== 'duplicate' && other.analysis) {
+            const currentPeople = currentAnalysis.entities.people.map(p => p.value);
+            const otherPeople = other.analysis.entities.people.map(p => p.value);
+            const sharedPeople = otherPeople.filter(p => currentPeople.includes(p));
+            
+            if (sharedPeople.length > 0) {
+                score += (sharedPeople.length * 10);
+                reasons.push(`Personas compartidas: ${sharedPeople.slice(0, 2).join(', ')}`);
+            }
 
-                // Close Dates
-                const otherDate = new Date(other.createdAt).toDateString(); // In real app, use extracted date from text
-                // Check if suggested series matches
-                if (other.analysis.suggestedSeries === currentAnalysis.suggestedSeries) {
-                    score += 5;
-                    reasons.push(`Misma serie documental: ${currentAnalysis.suggestedSeries}`);
-                }
+            if (other.analysis.suggestedSeries?.value === currentAnalysis.suggestedSeries?.value) {
+                score += 5;
+                reasons.push(`Misma serie documental: ${currentAnalysis.suggestedSeries.value}`);
             }
         }
 
@@ -158,8 +134,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
             });
         }
     });
-
-    // Sort by relevance
     matches.sort((a, b) => b.score - a.score);
     setRelations(matches);
     return matches;
@@ -180,23 +154,16 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
     if (!image) return;
     setIsProcessing(true);
     try {
-      // Q1, Q5, Q7: Transcribe & Visual Scan (usando backend seguro)
       const transResult = await aiService.transcribe(image);
       setText(transResult.text);
       setVisualAnalysis(transResult.visual);
 
-      // AUTOMATIC ANALYSIS (Q11 Language, Typology, etc.)
       if (transResult.text) {
-          const anaResult = await aiService.analyze(transResult.text);
+          const { analysis: anaResult } = await aiService.analyze(transResult.text);
           setAnalysis(anaResult);
-
-          // Compute relations immediately
           const newRelations = calculateRelations(anaResult, transResult.text);
-
-          // Save complete state
           saveManuscript(transResult.text, anaResult, transResult.visual, translatedText, newRelations);
       }
-
     } catch (err) {
       console.error(err);
       alert("Error procesando el manuscrito: " + (err instanceof Error ? err.message : 'Error desconocido'));
@@ -209,12 +176,10 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
     if (!text) return;
     setIsProcessing(true);
     try {
-      // Manual trigger backup (usando backend seguro)
-      const result = await aiService.analyze(text);
+      const { analysis: result } = await aiService.analyze(text);
       setAnalysis(result);
       const newRelations = calculateRelations(result, text);
       setActiveTab('diplomatics');
-
       saveManuscript(text, result, visualAnalysis, translatedText, newRelations);
     } catch (err) {
         alert("Error analizando el texto: " + (err instanceof Error ? err.message : 'Error desconocido'));
@@ -241,7 +206,7 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
     if (!image) return;
     const manuscript: Manuscript = {
         id: initialManuscript?.id || Date.now().toString(),
-        title: a?.titleSuggestion || initialManuscript?.title || "Documento Sin Título",
+        title: a?.titleSuggestion?.value || initialManuscript?.title || "Documento Sin Título",
         imageUrl: image,
         transcription: t,
         translation: tr,
@@ -283,7 +248,7 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
             <div>
                 <h2 className="font-display font-bold text-wood-900 text-xl">Mesa de Trabajo</h2>
                 <div className="text-xs font-serif text-wood-800/60 flex items-center gap-2">
-                    {analysis?.typology && <Badge color="wood">{analysis.typology}</Badge>}
+                    {analysis?.typology?.value && <Badge color="wood">{analysis.typology.value}</Badge>}
                     {relations.length > 0 && <Badge color="copper">{relations.length} Relaciones Detectadas</Badge>}
                 </div>
             </div>
@@ -301,7 +266,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                     Transcribir & Analizar
                 </Button>
             )}
-            {/* Show manual analyze only if we have text but NO analysis yet (fallback) */}
             {text && !analysis && (
                 <Button onClick={handleAnalyze} disabled={isProcessing} variant="secondary">
                      {isProcessing ? <Icons.Spinner className="animate-spin w-4 h-4 mr-2" /> : <Icons.Analysis className="w-4 h-4 mr-2" />}
@@ -322,9 +286,7 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
       {/* Main Split View */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
         
-        {/* Left: Image Viewer & Visual Report */}
         <div className="flex flex-col gap-4 h-full min-h-0">
-            {/* Interactive Image Card */}
             <Card className="flex-1 !p-0 bg-wood-900/10 relative group overflow-hidden flex flex-col border border-wood-800/20">
                 {!image ? (
                     <div 
@@ -336,7 +298,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                     </div>
                 ) : (
                     <div className="relative w-full h-full overflow-hidden bg-wood-900/80">
-                         {/* Viewport */}
                         <div 
                             ref={containerRef}
                             className={`w-full h-full flex items-center justify-center overflow-hidden 
@@ -360,7 +321,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                             />
                         </div>
 
-                        {/* Floating Zoom Controls */}
                         <div className="absolute bottom-4 right-4 flex flex-col gap-2 bg-wood-900/90 backdrop-blur border border-copper-600/30 p-1.5 rounded-lg shadow-xl z-10">
                             <button onClick={() => handleZoom(0.2)} className="p-2 text-copper-400 hover:text-parchment-100 hover:bg-white/10 rounded transition-colors" title="Zoom In">
                                 <Icons.ZoomIn className="w-5 h-5" />
@@ -374,7 +334,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                             </button>
                         </div>
                         
-                        {/* Status Overlay */}
                         <div className="absolute top-4 left-4 pointer-events-none">
                             <div className="bg-wood-900/80 backdrop-blur px-3 py-1 rounded text-[10px] font-mono text-copper-400 border border-white/5">
                                 {Math.round(viewState.scale * 100)}% | {Math.round(viewState.x)}, {Math.round(viewState.y)}
@@ -394,18 +353,11 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                         {visualAnalysis.hasSeals && <Badge color="copper">Sello Detectado</Badge>}
                         {visualAnalysis.hasMaps && <Badge color="copper">Mapa/Plano</Badge>}
                         {visualAnalysis.hasTables && <Badge color="wood">Estructura Tabular</Badge>}
-                        
-                        {/* Physical Condition Status */}
-                        <span className={`text-xs font-serif border-l pl-2 ml-2 font-bold
-                            ${physicalAlert ? 'text-red-700 border-red-300' : 'text-wood-800/60 border-wood-800/20'}`}>
-                             {visualAnalysis.physicalCondition}
-                        </span>
                     </div>
                 </div>
             )}
         </div>
 
-        {/* Right: Analysis Tabs */}
         <Card className="flex flex-col h-full !p-0 overflow-hidden">
             <div className="flex border-b border-wood-800/10 bg-parchment-200">
                 <TabButton id="transcript" icon={Icons.File} label="Texto" />
@@ -416,7 +368,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
 
             <div className="flex-1 overflow-y-auto p-6 bg-parchment-100">
                 
-                {/* TAB 1: Transcription */}
                 {activeTab === 'transcript' && (
                     <div className="space-y-4">
                         <div className="flex justify-between items-center mb-2">
@@ -443,25 +394,24 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                     </div>
                 )}
 
-                {/* TAB 2: Diplomatics */}
                 {activeTab === 'diplomatics' && analysis && (
                     <div className="space-y-6 animate-fade-in">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-3 bg-wood-800/5 rounded">
                                 <p className="text-xs font-bold uppercase text-wood-800/50 mb-1">Tipología (Q4)</p>
-                                <p className="font-display font-bold text-wood-900">{analysis.typology}</p>
+                                <p className="font-display font-bold text-wood-900">{analysis.typology?.value}</p>
                             </div>
                             <div className="p-3 bg-wood-800/5 rounded">
                                 <p className="text-xs font-bold uppercase text-wood-800/50 mb-1">Serie (Q8)</p>
-                                <p className="font-display font-bold text-wood-900">{analysis.suggestedSeries}</p>
+                                <p className="font-display font-bold text-wood-900">{analysis.suggestedSeries?.value}</p>
                             </div>
                         </div>
                         <div>
                             <h4 className="text-xs font-bold uppercase text-wood-800/60 mb-2">Metadatos (Q6)</h4>
-                            <p className="font-serif font-bold text-lg text-wood-900 mb-2">{analysis.titleSuggestion}</p>
-                            <p className="font-serif text-sm text-wood-800 leading-relaxed mb-3">{analysis.summary}</p>
+                            <p className="font-serif font-bold text-lg text-wood-900 mb-2">{analysis.titleSuggestion?.value}</p>
+                            <p className="font-serif text-sm text-wood-800 leading-relaxed mb-3">{analysis.summary?.value}</p>
                             <div className="flex flex-wrap gap-2">
-                                {analysis.keywords.map((k, i) => <Badge key={i} color="wood">#{k}</Badge>)}
+                                {analysis.keywords?.map((k, i) => <Badge key={i} color="wood">#{k.value}</Badge>)}
                             </div>
                         </div>
                         
@@ -470,31 +420,28 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                             <div className="space-y-3 font-serif text-sm text-wood-900">
                                 <div className="flex justify-between items-center border-b border-wood-800/5 pb-2">
                                     <span className="text-wood-800/60">Escritura</span>
-                                    <span className="font-bold">{analysis.scriptType}</span>
+                                    <span className="font-bold">{analysis.scriptType?.value}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-wood-800/60">Idioma Detectado</span>
                                     <span className="font-bold text-copper-700 bg-copper-100 px-2 py-0.5 rounded text-xs uppercase tracking-wider border border-copper-200">
-                                        {analysis.language}
+                                        {analysis.language?.value}
                                     </span>
                                 </div>
                             </div>
                         </section>
 
-                        {/* Q15 Quality Alerts (Consolidated: Textual + Physical) */}
                         {(analysis.qualityAlerts?.length > 0 || physicalAlert) && (
                             <div className="bg-red-50 border border-red-100 p-3 rounded">
                                 <h4 className="text-xs font-bold uppercase text-red-800/60 mb-2 flex items-center gap-2">
                                     <Icons.Analysis className="w-3 h-3" /> Curación y Conservación
                                 </h4>
                                 <ul className="list-disc list-inside text-xs text-red-900/70 font-serif">
-                                    {/* Show Physical Alert First if exists */}
                                     {physicalAlert && (
                                         <li className="font-bold text-red-800 mb-1">{physicalAlert}</li>
                                     )}
-                                    {/* Show AI Text Alerts */}
                                     {analysis.qualityAlerts.map((alert, i) => (
-                                        <li key={i}>{alert}</li>
+                                        <li key={i}>{alert.value}</li>
                                     ))}
                                 </ul>
                             </div>
@@ -502,7 +449,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                     </div>
                 )}
 
-                {/* TAB 3: Geo */}
                 {activeTab === 'geo' && analysis && (
                     <div className="space-y-6 animate-fade-in">
                         <div>
@@ -523,14 +469,13 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                         <div>
                             <h4 className="text-xs font-bold uppercase text-wood-800/60 mb-2">Entidades (Q2)</h4>
                             <div className="flex flex-wrap gap-2">
-                                {analysis.entities.people.map((p, i) => <Badge key={i} color="copper">{p}</Badge>)}
-                                {analysis.entities.organizations.map((o, i) => <Badge key={i} color="wood">{o}</Badge>)}
+                                {analysis.entities.people?.map((p, i) => <Badge key={i} color="copper" item={p} />)}
+                                {analysis.entities.organizations?.map((o, i) => <Badge key={i} color="wood" item={o} />)}
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* TAB 4: RELATIONS (Q10) */}
                 {activeTab === 'relations' && analysis && (
                     <div className="space-y-6 animate-fade-in">
                         <div>
@@ -538,19 +483,17 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                                 <Icons.Library className="w-3 h-3" /> Expediente Virtual (Q10)
                             </h4>
                             
-                            {/* Explicit Text References (Extracted by Gemini) */}
                             {analysis.documentReferences && analysis.documentReferences.length > 0 && (
                                 <div className="mb-6 p-4 bg-wood-800/5 rounded border-l-2 border-wood-800">
                                     <p className="text-xs font-bold text-wood-800 uppercase mb-2">Citas en el texto</p>
                                     <ul className="list-disc list-inside text-sm font-serif italic text-wood-900">
                                         {analysis.documentReferences.map((ref, i) => (
-                                            <li key={i}>{ref}</li>
+                                            <li key={i}>{ref.value}</li>
                                         ))}
                                     </ul>
                                 </div>
                             )}
 
-                            {/* Calculated Relationships */}
                             {relations.length === 0 ? (
                                 <div className="text-center p-6 border border-dashed border-wood-800/20 rounded">
                                     <Icons.File className="w-8 h-8 text-wood-800/20 mx-auto mb-2" />
@@ -563,9 +506,7 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                                     {relations.map((rel, i) => {
                                         const relatedDoc = existingManuscripts.find(m => m.id === rel.manuscriptId);
                                         if (!relatedDoc) return null;
-
                                         const isDuplicate = rel.reason === 'duplicate';
-
                                         return (
                                             <div 
                                                 key={i} 
@@ -575,7 +516,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                                                         : 'bg-white border-wood-800/10 hover:border-copper-500 hover:shadow-md'
                                                     }`}
                                             >
-                                                {/* Thumbnail Image */}
                                                 <div className="shrink-0 w-20 h-20 bg-wood-900/10 rounded-sm overflow-hidden border border-wood-800/20 relative">
                                                      {relatedDoc.imageUrl ? (
                                                         <img 
@@ -593,7 +533,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                                                      )}
                                                 </div>
 
-                                                {/* Details */}
                                                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                                                     <div>
                                                         <div className="flex justify-between items-start gap-2 mb-1">
@@ -633,7 +572,6 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                 )}
             </div>
         </Card>
-
       </div>
     </div>
   );

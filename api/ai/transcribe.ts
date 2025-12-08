@@ -9,45 +9,10 @@ if (!API_KEY) {
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY || '' });
-const MODEL_NAME = 'gemini-3-pro-preview';
-
-async function transcribeHandler(req: VercelRequest, res: VercelResponse, auth: any) {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
-
-  try {
-    const { imageBase64 } = req.body;
-
-    if (!imageBase64) {
-      return res.status(400).json({ error: 'Imagen requerida' });
-    }
-
-    if (!API_KEY) {
-      return res.status(500).json({
-        error: 'Configuración incompleta',
-        message: 'GOOGLE_API_KEY no está configurada en el servidor'
-      });
-    }
-
-    // Limpiar base64
-    const cleanBase64 = imageBase64.replace(/^data:image\/(png|jpeg|jpg|webp);base64,/, '');
-
-    console.log(`🔍 Usuario ${auth.email} (${auth.userId}) iniciando transcripción`);
-
-    const response = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents: {
+    const MODEL_NAME = 'gemini-1.5-pro-latest';
+    
+    const response = await ai.getGenerativeModel({ model: MODEL_NAME }).generateContent({
+      contents: [{
         parts: [
           {
             inlineData: {
@@ -73,13 +38,17 @@ async function transcribeHandler(req: VercelRequest, res: VercelResponse, auth: 
             }`
           },
         ],
-      },
-      config: {
-        responseMimeType: "application/json"
-      }
+      }],
+      // config: {
+      //   responseMimeType: "application/json" // This is often inferred, and can cause issues if model doesn't support it for multipart
+      // }
     });
 
-    const json = JSON.parse(response.text || "{}");
+    const responseText = response.response.text();
+    if (!responseText) {
+      throw new Error('La respuesta de la IA estaba vacía.');
+    }
+    const json = JSON.parse(responseText);
 
     console.log(`✅ Transcripción completada para usuario ${auth.email}`);
 
@@ -96,9 +65,11 @@ async function transcribeHandler(req: VercelRequest, res: VercelResponse, auth: 
     });
   } catch (error: any) {
     console.error('❌ Error en transcripción:', error);
+    // Return a more detailed error message for debugging on the frontend
     return res.status(500).json({
-      error: 'Error al transcribir manuscrito',
+      error: 'Error al transcribir manuscrito (backend)',
       message: error.message,
+      stack: error.stack, // Include stack trace for more detailed debugging
     });
   }
 }
