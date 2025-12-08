@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { Dashboard } from './components/Dashboard';
 import { Transcriber } from './components/Transcriber';
 import { UserGuide } from './components/UserGuide';
+import { AuthModal } from './src/components/AuthModal';
 import { Icons } from './components/Icons';
-import { ViewState, Manuscript } from './types';
+import { ViewState, Manuscript, User } from './types';
+import { useAuth } from './src/contexts/AuthContext';
+import { UserManagement } from './components/Admin/UserManagement';
 
 function App() {
+  const { isAuthenticated, isLoading, user, logout } = useAuth();
   const [view, setView] = useState<ViewState>(ViewState.DASHBOARD);
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
   const [selectedManuscript, setSelectedManuscript] = useState<Manuscript | undefined>(undefined);
@@ -28,9 +32,34 @@ function App() {
       : 'text-parchment-300 hover:bg-wood-800 hover:text-parchment-100 border border-transparent'}
   `;
 
+  // Mostrar pantalla de carga mientras verifica autenticación
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-parchment-200 items-center justify-center">
+        <div className="text-center">
+          <Icons.Quill className="w-16 h-16 text-copper-500 mx-auto mb-4 animate-pulse" />
+          <p className="font-display text-wood-900 text-lg">Cargando Scriptorium...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar login si no está autenticado
+  if (!isAuthenticated) {
+    return (
+      <div className="flex h-screen bg-parchment-200 text-wood-900 font-serif overflow-hidden items-center justify-center relative">
+        <div
+          className="absolute inset-0 pointer-events-none opacity-40 z-0 mix-blend-multiply"
+          style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/cream-paper.png")' }}
+        />
+        <AuthModal onClose={() => {}} required={true} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-parchment-200 text-wood-900 font-serif overflow-hidden">
-      
+
       {/* Sidebar - Wood Texture */}
       <aside 
         className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-wood-900 border-r border-wood-800 relative transition-all duration-300 flex flex-col shadow-2xl z-20`}
@@ -78,12 +107,52 @@ function App() {
                 <Icons.Help className="w-5 h-5 flex-shrink-0" />
                 {sidebarOpen && <span className="font-display text-sm tracking-wide">Manual de Usuario</span>}
               </button>
+             {user?.role === 'admin' && (
+                <button 
+                    onClick={() => { setView(ViewState.ADMIN); setSelectedManuscript(undefined); }}
+                    className={navItemClass(view === ViewState.ADMIN)}
+                >
+                    <Icons.Admin className="w-5 h-5 flex-shrink-0" />
+                    {sidebarOpen && <span className="font-display text-sm tracking-wide">Administración</span>}
+                </button>
+             )}
           </div>
         </nav>
 
-        <div className="p-4 border-t border-wood-800/50 bg-wood-900/30">
-             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="w-full flex justify-center text-wood-800/50 hover:text-copper-400 transition-colors">
-                {sidebarOpen ? 'Colapsar' : 'Expandir'}
+        <div className="p-4 border-t border-wood-800/50 bg-wood-900/30 space-y-2">
+             {sidebarOpen && user && (
+               <div className="text-center text-parchment-200 text-xs px-2 py-1 mb-2 border-b border-wood-800/30 pb-3">
+                 <p className="font-display font-bold truncate">{user?.name}</p>
+                 <p className="text-parchment-300/70 text-[10px] truncate">{user?.email}</p>
+               </div>
+             )}
+
+             {/* Botón de Configuración */}
+             <button
+               onClick={() => alert('Configuración en desarrollo')}
+               className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-sm text-parchment-300 hover:bg-wood-800 hover:text-parchment-100 transition-all"
+             >
+               <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+               </svg>
+               {sidebarOpen && <span className="font-display text-sm">Configuración</span>}
+             </button>
+
+             {/* Botón de Logout */}
+             <button
+               onClick={logout}
+               className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-sm bg-red-600/80 hover:bg-red-700 text-parchment-100 transition-all shadow-md font-display font-bold"
+             >
+               <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+               </svg>
+               {sidebarOpen && <span className="text-sm">Cerrar Sesión</span>}
+             </button>
+
+             {/* Botón Colapsar/Expandir */}
+             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="w-full flex justify-center text-wood-800/50 hover:text-copper-400 transition-colors text-xs pt-2 border-t border-wood-800/30">
+                {sidebarOpen ? 'Colapsar ◀' : 'Expandir ▶'}
              </button>
         </div>
       </aside>
@@ -122,6 +191,10 @@ function App() {
 
             {view === ViewState.GUIDE && (
               <UserGuide />
+            )}
+
+            {view === ViewState.ADMIN && (
+              <UserManagement />
             )}
           </div>
         </div>

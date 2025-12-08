@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Verificar contraseña
-    const passwordMatch = await verifyPassword(password, user.password);
+    const passwordMatch = await verifyPassword(password, user.password_hash || '');
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
@@ -56,7 +56,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         email: user.email,
         name: user.name,
         role: user.role,
-        organization: user.organization,
       },
       token,
     });

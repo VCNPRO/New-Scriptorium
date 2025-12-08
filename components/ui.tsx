@@ -42,12 +42,27 @@ export const Card: React.FC<{ children: React.ReactNode; className?: string; tit
   );
 };
 
-export const Badge: React.FC<{ children: React.ReactNode; color?: 'copper' | 'wood' | 'green' }> = ({ children, color = 'copper' }) => {
+const ConfidenceDot = ({ confidence }: { confidence: number }) => {
+  const color = confidence > 0.9 ? 'bg-green-500' : confidence > 0.75 ? 'bg-yellow-500' : 'bg-red-500';
+  return <div className={`w-2 h-2 rounded-full ${color}`} title={`Confianza: ${(confidence * 100).toFixed(0)}%`}></div>;
+};
+
+export const Badge: React.FC<{ children?: React.ReactNode; color?: 'copper' | 'wood' | 'green'; item?: { value: string; confidence: number } }> = ({ children, color = 'copper', item }) => {
   const colors = {
     copper: "bg-copper-100 text-copper-800 border-copper-200",
     wood: "bg-wood-800/10 text-wood-900 border-wood-800/20",
     green: "bg-green-100 text-green-900 border-green-200"
   };
+
+  if (item) {
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-serif font-semibold border rounded-full ${colors[color]}`}>
+        <ConfidenceDot confidence={item.confidence} />
+        {item.value}
+      </span>
+    );
+  }
+
   return (
     <span className={`px-2 py-0.5 text-xs font-serif font-semibold border rounded-full ${colors[color]}`}>
       {children}

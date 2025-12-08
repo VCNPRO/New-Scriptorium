@@ -19,7 +19,12 @@ import {
   RotateCcw,
   Move,
   HelpCircle,
-  Info
+  Info,
+  Shield,
+  UserPlus,
+  Check,
+  X,
+  Edit
 } from 'lucide-react';
 
 export const Icons = {
@@ -42,5 +47,11 @@ export const Icons = {
   Reset: RotateCcw,
   Move: Move,
   Help: HelpCircle,
-  Info: Info
+  Info: Info,
+  Admin: Shield,
+  UserPlus: UserPlus,
+  Check: Check,
+  X: X,
+  Edit: Edit,
+  close: X,
 };

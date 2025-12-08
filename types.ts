@@ -1,59 +1,53 @@
+// Generic type for a data point extracted by AI
+export interface ConfidenceItem<T> {
+  value: T;
+  confidence: number;
+}
 
 export interface GeoPoint {
   place: string;
-  coordinates?: { lat: number; lng: number }; // Estimated
+  latitude?: number;
+  longitude?: number;
   type: 'origin' | 'reference';
+  confidence: number;
 }
 
 export interface AnalysisData {
-  // Q2, Q6: Metadata & Extraction
-  summary: string;
-  titleSuggestion: string;
-  keywords: string[];
+  summary: ConfidenceItem<string>;
+  titleSuggestion: ConfidenceItem<string>;
+  keywords: ConfidenceItem<string>[];
   
-  // Q2: Entities & Events
   entities: {
-    people: string[];
-    locations: string[];
-    dates: string[];
-    organizations: string[];
-    events: string[]; // Q2
+    people: ConfidenceItem<string>[];
+    locations: ConfidenceItem<string>[];
+    dates: ConfidenceItem<string>[];
+    organizations: ConfidenceItem<string>[];
+    events: ConfidenceItem<string>[];
   };
   
-  // Q4, Q11: Typology & Paleography
-  typology: string; // e.g., "Real Cédula", "Carta Dotal"
-  scriptType: string; // e.g., "Visigótica", "Cortesana"
-  language: string;
+  typology: ConfidenceItem<string>;
+  scriptType: ConfidenceItem<string>;
+  language: ConfidenceItem<string>;
   
-  // Q12: Geography
   geodata: GeoPoint[];
   
-  // Q8: Cataloging
-  suggestedSeries: string; // e.g., "Protocolos Notariales"
+  suggestedSeries: ConfidenceItem<string>;
   
-  // Q15: Curation
-  qualityAlerts: string[]; // e.g., "Posible error de fecha", "Texto ilegible en folio 2"
-  
-  // Q13: Themes (Sentiment/Tone)
-  sentiment: string;
-  historicalContext?: string;
-
-  // Q10: Explicit text references found by AI
-  documentReferences?: string[]; // e.g., "Referencia a la carta del día 5"
+  qualityAlerts: ConfidenceItem<string>[];
+  documentReferences?: ConfidenceItem<string>[];
 }
 
 export interface VisualAnalysis {
-  // Q5, Q7: Visual Elements
   hasSeals: boolean;
   hasMaps: boolean;
   hasTables: boolean;
   hasIlluminations: boolean;
-  physicalCondition: string; // e.g., "Manchas de humedad", "Roturas"
+  physicalCondition: string;
 }
 
 export interface RelationMatch {
   manuscriptId: string;
-  score: number; // 0-100 relevance
+  score: number;
   reason: 'duplicate' | 'same_expediente' | 'same_date' | 'reference';
   details: string;
 }
@@ -63,20 +57,26 @@ export interface Manuscript {
   title: string;
   imageUrl: string;
   
-  // Q1, Q14
   transcription: string;
-  translation?: string; // Q14
+  translation?: string;
   
   analysis: AnalysisData | null;
-  visualAnalysis: VisualAnalysis | null; // New field
+  visualAnalysis: VisualAnalysis | null;
   
   createdAt: Date;
   status: 'pending' | 'processing' | 'completed';
   
-  // Q9, Q10: Relationships
   isDuplicateOf?: string;
-  relatedManuscriptIds?: string[]; // IDs stored
-  calculatedRelations?: RelationMatch[]; // Dynamic relations calculated at runtime
+  relatedManuscriptIds?: string[];
+  calculatedRelations?: RelationMatch[];
+}
+
+export interface User {
+    id: string;
+    email: string;
+    name: string | null;
+    role: 'user' | 'admin' | 'researcher';
+    createdAt: Date;
 }
 
 export enum ViewState {
@@ -84,5 +84,6 @@ export enum ViewState {
   TRANSCRIBE = 'TRANSCRIBE',
   LIBRARY = 'LIBRARY',
   SETTINGS = 'SETTINGS',
-  GUIDE = 'GUIDE'
+  GUIDE = 'GUIDE',
+  ADMIN = 'ADMIN' // Add admin view state
 }

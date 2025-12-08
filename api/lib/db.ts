@@ -3,10 +3,9 @@ import { sql } from '@vercel/postgres';
 export interface User {
   id: string;
   email: string;
-  password: string;
+  password_hash?: string;
   name: string | null;
   role: 'user' | 'admin' | 'researcher';
-  organization: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -31,11 +30,11 @@ export interface ManuscriptDB {
 
 // User Database Operations
 export const UserDB = {
-  async create(email: string, password: string, name: string, role: string = 'user') {
+  async create(email: string, passwordHash: string, name: string, role: string = 'user') {
     const result = await sql<User>`
-      INSERT INTO users (email, password, name, role)
-      VALUES (${email.toLowerCase()}, ${password}, ${name}, ${role})
-      RETURNING id, email, name, role, organization, created_at, updated_at
+      INSERT INTO users (email, password_hash, name, role)
+      VALUES (${email.toLowerCase()}, ${passwordHash}, ${name}, ${role})
+      RETURNING id, email, name, role, created_at, updated_at
     `;
     return result.rows[0];
   },
@@ -49,8 +48,26 @@ export const UserDB = {
 
   async findById(id: string) {
     const result = await sql<User>`
-      SELECT id, email, name, role, organization, created_at, updated_at
+      SELECT id, email, name, role, created_at, updated_at
       FROM users WHERE id = ${id} LIMIT 1
+    `;
+    return result.rows[0] || null;
+  },
+
+  async findAll() {
+    const result = await sql<User>`
+      SELECT id, email, name, role, created_at, updated_at
+      FROM users ORDER BY created_at DESC
+    `;
+    return result.rows;
+  },
+
+  async updateRole(id: string, role: 'user' | 'admin' | 'researcher') {
+    const result = await sql<User>`
+      UPDATE users
+      SET role = ${role}, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ${id}
+      RETURNING id, email, name, role, created_at, updated_at
     `;
     return result.rows[0] || null;
   },
@@ -62,10 +79,6 @@ export const UserDB = {
     if (updates.name !== undefined) {
       setClauses.push(`name = $${values.length + 1}`);
       values.push(updates.name);
-    }
-    if (updates.organization !== undefined) {
-      setClauses.push(`organization = $${values.length + 1}`);
-      values.push(updates.organization);
     }
 
     if (setClauses.length === 0) return null;
