@@ -91,9 +91,9 @@ function App() {
             {sidebarOpen && <span className="font-display text-sm tracking-wide">Mesa de Trabajo</span>}
           </button>
 
-          <button 
+          <button
+            onClick={() => { setView(ViewState.LIBRARY); setSelectedManuscript(undefined); }}
             className={navItemClass(view === ViewState.LIBRARY)}
-            // Placeholder for Library view logic if expanded later
           >
             <Icons.Library className="w-5 h-5 flex-shrink-0" />
             {sidebarOpen && <span className="font-display text-sm tracking-wide">Archivos</span>}
@@ -187,6 +187,62 @@ function App() {
                   setSelectedManuscript(undefined);
                 }}
               />
+            )}
+
+            {view === ViewState.LIBRARY && (
+              <div className="animate-fade-in">
+                <h1 className="font-display font-bold text-3xl text-wood-900 mb-6">Biblioteca de Manuscritos</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {manuscripts.length === 0 ? (
+                    <div className="col-span-full text-center py-12">
+                      <Icons.Library className="w-16 h-16 text-wood-800/20 mx-auto mb-4" />
+                      <p className="font-serif text-wood-800/60 text-lg">No hay manuscritos en la biblioteca.</p>
+                      <p className="font-serif text-wood-800/40 text-sm mt-2">
+                        Ve a "Mesa de Trabajo" para transcribir tu primer documento.
+                      </p>
+                    </div>
+                  ) : (
+                    manuscripts.map((manuscript) => (
+                      <div
+                        key={manuscript.id}
+                        onClick={() => {
+                          setSelectedManuscript(manuscript);
+                          setView(ViewState.TRANSCRIBE);
+                        }}
+                        className="bg-parchment-100 border border-wood-800/20 rounded-lg p-4 cursor-pointer hover:shadow-lg hover:border-copper-500 transition-all"
+                      >
+                        <div className="aspect-video bg-wood-900/10 rounded mb-3 overflow-hidden">
+                          {manuscript.imageUrl ? (
+                            <img
+                              src={manuscript.imageUrl}
+                              alt={manuscript.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Icons.File className="w-12 h-12 text-wood-800/30" />
+                            </div>
+                          )}
+                        </div>
+                        <h3 className="font-display font-bold text-wood-900 mb-2 truncate">
+                          {manuscript.title}
+                        </h3>
+                        <p className="font-serif text-sm text-wood-800/70 line-clamp-2 mb-2">
+                          {manuscript.analysis?.summary?.value || 'Sin resumen disponible'}
+                        </p>
+                        <div className="flex items-center justify-between text-xs text-wood-800/50">
+                          <span>{new Date(manuscript.createdAt).toLocaleDateString()}</span>
+                          {manuscript.analysis?.typology?.value && (
+                            <span className="bg-copper-100 text-copper-800 px-2 py-1 rounded font-bold">
+                              {manuscript.analysis.typology.value}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             )}
 
             {view === ViewState.GUIDE && (
