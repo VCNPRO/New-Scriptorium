@@ -7,6 +7,7 @@ import { Icons } from './components/Icons';
 import { ViewState, Manuscript, User } from './types';
 import { useAuth } from './src/contexts/AuthContext';
 import { UserManagement } from './components/Admin/UserManagement';
+import { SearchBar } from './components/SearchBar';
 
 function App() {
   const { isAuthenticated, isLoading, user, logout } = useAuth();
@@ -191,7 +192,27 @@ function App() {
 
             {view === ViewState.LIBRARY && (
               <div className="animate-fade-in">
-                <h1 className="font-display font-bold text-3xl text-wood-900 mb-6">Biblioteca de Manuscritos</h1>
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                  <h1 className="font-display font-bold text-3xl text-wood-900">Biblioteca de Manuscritos</h1>
+                  <div className="w-full md:w-96">
+                    <SearchBar onSelectManuscript={(result) => {
+                      const manuscript: Manuscript = {
+                        id: result.id,
+                        title: result.title,
+                        imageUrl: result.imageUrl,
+                        transcription: result.transcription,
+                        translation: '',
+                        analysis: result.analysis,
+                        visualAnalysis: null,
+                        createdAt: new Date(result.createdAt),
+                        status: 'completed',
+                        calculatedRelations: []
+                      };
+                      setSelectedManuscript(manuscript);
+                      setView(ViewState.TRANSCRIBE);
+                    }} />
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {manuscripts.length === 0 ? (
                     <div className="col-span-full text-center py-12">

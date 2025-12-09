@@ -67,6 +67,13 @@ export const manuscriptService = {
     });
   },
 
+  async search(query: string, limit: number = 10) {
+    return authenticatedFetch(`${API_BASE}/manuscripts/search`, {
+      method: 'POST',
+      body: JSON.stringify({ query, limit }),
+    });
+  },
+
   async update(id: string, updates: any) {
     return authenticatedFetch(`${API_BASE}/manuscripts/update?id=${id}`, {
       method: 'PUT',

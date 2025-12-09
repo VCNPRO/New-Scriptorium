@@ -5,6 +5,7 @@ import { Manuscript, RelationMatch } from '../types';
 import { StatisticalAnalysis } from './Dashboard/StatisticalAnalysis';
 import DynamicMap from './Dashboard/InteractiveMap';
 import { ConfidenceDisplay, ConfidenceDot } from './Confidence';
+import { SearchBar } from './SearchBar';
 
 interface DashboardProps {
   recentManuscripts: Manuscript[];
@@ -658,14 +659,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ recentManuscripts, onNewTr
                                   {/* Control Bar (Professional Tooling) */}
                                   <div className="bg-parchment-200/50 border border-wood-800/10 p-2 rounded-sm flex flex-col md:flex-row items-center gap-2 shadow-inner mb-4">
                                         <div className="flex-1 flex items-center gap-2 w-full">
-                                            <div className="relative flex-1">
-                                                <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-wood-800/40" />
-                                                <input 
-                                                    placeholder="Búsqueda avanzada (ID, Título, Serie, Contenido...)" 
-                                                    value={searchValue}
-                                                    onChange={(e) => setSearchValue(e.target.value)}
-                                                    className="w-full pl-9 pr-3 py-2 bg-parchment-100 border border-wood-800/20 text-wood-900 text-sm font-serif rounded-sm focus:outline-none focus:border-copper-500"
-                                                />
+                                            <div className="flex-1">
+                                                <SearchBar onSelectManuscript={(result) => {
+                                                  // Convertir resultado de búsqueda a Manuscript
+                                                  const manuscript: Manuscript = {
+                                                    id: result.id,
+                                                    title: result.title,
+                                                    imageUrl: result.imageUrl,
+                                                    transcription: result.transcription,
+                                                    translation: '',
+                                                    analysis: result.analysis,
+                                                    visualAnalysis: null,
+                                                    createdAt: new Date(result.createdAt),
+                                                    status: 'completed',
+                                                    calculatedRelations: []
+                                                  };
+                                                  onSelectManuscript(manuscript);
+                                                }} />
                                             </div>
                                             
                                             <select 
