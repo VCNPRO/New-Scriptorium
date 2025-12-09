@@ -1,9 +1,5 @@
 {
   "functions": {
-    "api/ai/transcribe.ts": {
-      "maxDuration": 300,
-      "maxLambdaRequestSize": 10485760
-    },
     "api/**/*": {
       "maxDuration": 300
     }
