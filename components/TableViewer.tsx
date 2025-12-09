@@ -68,46 +68,55 @@ export const TableViewer: React.FC<TableViewerProps> = ({ tables }) => {
           className="bg-white border-2 border-wood-800/10 rounded-lg overflow-hidden shadow-sm"
         >
           {/* Header de la tabla */}
-          <div
-            className="bg-parchment-200/50 px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-parchment-200 transition-colors"
-            onClick={() => setExpandedTable(expandedTable === tableIndex ? null : tableIndex)}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-lg">
-                {expandedTable === tableIndex ? '▼' : '▶'}
-              </span>
-              <div>
-                <h5 className="font-display font-bold text-wood-900">
-                  {table.title || `Tabla ${tableIndex + 1}`}
-                </h5>
-                <p className="text-xs text-wood-800/60">
-                  {table.headers.length} columnas × {table.rows.length} filas
-                  {' • '}
-                  Confianza: {(table.confidence * 100).toFixed(0)}%
-                </p>
+          <div className="bg-parchment-200/50 px-4 py-3 border-b border-wood-800/10">
+            <div className="flex items-center justify-between mb-2">
+              <div
+                className="flex items-center gap-3 flex-1 cursor-pointer hover:text-copper-700 transition-colors"
+                onClick={() => setExpandedTable(expandedTable === tableIndex ? null : tableIndex)}
+              >
+                <span className="text-lg text-copper-600">
+                  {expandedTable === tableIndex ? '▼' : '▶'}
+                </span>
+                <div>
+                  <h5 className="font-display font-bold text-wood-900">
+                    {table.title || `Tabla ${tableIndex + 1}`}
+                  </h5>
+                  <p className="text-xs text-wood-800/60">
+                    {table.headers.length} columnas × {table.rows.length} filas
+                    {' • '}
+                    Confianza: {(table.confidence * 100).toFixed(0)}%
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {expandedTable === tableIndex && (
+              {/* Botones siempre visibles */}
               <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                 <button
                   onClick={() => copyTableToClipboard(table)}
-                  className="px-3 py-1 bg-copper-100 hover:bg-copper-200 text-copper-800 text-xs font-bold rounded transition-colors flex items-center gap-1"
-                  title="Copiar tabla"
+                  className="px-3 py-1.5 bg-copper-100 hover:bg-copper-200 text-copper-800 text-xs font-bold rounded transition-colors flex items-center gap-1.5 shadow-sm"
+                  title="Copiar tabla al portapapeles (compatible con Excel)"
                 >
-                  <Icons.File className="w-3 h-3" />
+                  <Icons.File className="w-4 h-4" />
                   Copiar
                 </button>
                 <button
                   onClick={() => exportTableToCSV(table)}
-                  className="px-3 py-1 bg-wood-800 hover:bg-wood-700 text-parchment-100 text-xs font-bold rounded transition-colors flex items-center gap-1"
-                  title="Exportar a CSV"
+                  className="px-3 py-1.5 bg-wood-800 hover:bg-wood-700 text-parchment-100 text-xs font-bold rounded transition-colors flex items-center gap-1.5 shadow-sm"
+                  title="Descargar tabla como archivo CSV"
                 >
-                  <Icons.Save className="w-3 h-3" />
+                  <Icons.Save className="w-4 h-4" />
                   CSV
                 </button>
               </div>
-            )}
+            </div>
+
+            {/* Indicador para expandir/colapsar */}
+            {!expandedTable || expandedTable !== tableIndex ? (
+              <div className="text-xs text-wood-800/40 italic flex items-center gap-1 ml-8">
+                <span>👉</span>
+                Haz clic en el título para ver la tabla completa
+              </div>
+            ) : null}
           </div>
 
           {/* Contenido de la tabla */}

@@ -6,6 +6,7 @@ import { aiService } from '../src/services/apiService';
 import { ManuscriptMap } from './ManuscriptMap';
 import { TableViewer } from './TableViewer';
 import { PDFUploader } from './PDFUploader';
+import { ExportManuscript } from './ExportManuscript';
 
 interface TranscriberProps {
   initialManuscript?: Manuscript;
@@ -281,10 +282,26 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                 </Button>
             )}
             {analysis && (
-                <Button variant="primary" onClick={() => saveManuscript(text, analysis, visualAnalysis, translatedText, relations)}>
-                    <Icons.Save className="w-4 h-4 mr-2" />
-                    Guardar
-                </Button>
+                <>
+                    <Button variant="primary" onClick={() => saveManuscript(text, analysis, visualAnalysis, translatedText, relations)}>
+                        <Icons.Save className="w-4 h-4 mr-2" />
+                        Guardar
+                    </Button>
+                    <ExportManuscript
+                        manuscript={{
+                            id: initialManuscript?.id || Date.now().toString(),
+                            title: analysis?.titleSuggestion?.value || initialManuscript?.title || "Documento Sin Título",
+                            imageUrl: image!,
+                            transcription: text,
+                            translation: translatedText,
+                            analysis: analysis,
+                            visualAnalysis: visualAnalysis,
+                            createdAt: initialManuscript?.createdAt || new Date(),
+                            status: 'completed',
+                            calculatedRelations: relations
+                        }}
+                    />
+                </>
             )}
         </div>
       </div>
