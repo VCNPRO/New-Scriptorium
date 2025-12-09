@@ -27,6 +27,8 @@
     "jsonwebtoken": "^9.0.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.556.0",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^5.4.449",
     "react": "^19.2.1",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.1",

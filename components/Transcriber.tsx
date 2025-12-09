@@ -5,6 +5,7 @@ import { Manuscript, AnalysisData, VisualAnalysis, RelationMatch } from '../type
 import { aiService } from '../src/services/apiService';
 import { ManuscriptMap } from './ManuscriptMap';
 import { TableViewer } from './TableViewer';
+import { PDFUploader } from './PDFUploader';
 
 interface TranscriberProps {
   initialManuscript?: Manuscript;
@@ -19,13 +20,14 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
   const [image, setImage] = useState<string | null>(initialManuscript?.imageUrl || null);
   const [text, setText] = useState<string>(initialManuscript?.transcription || '');
   const [translatedText, setTranslatedText] = useState<string>(initialManuscript?.translation || '');
-  
+
   const [analysis, setAnalysis] = useState<AnalysisData | null>(initialManuscript?.analysis || null);
   const [visualAnalysis, setVisualAnalysis] = useState<VisualAnalysis | null>(initialManuscript?.visualAnalysis || null);
   const [relations, setRelations] = useState<RelationMatch[]>(initialManuscript?.calculatedRelations || []);
-  
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('transcript');
+  const [uploadMode, setUploadMode] = useState<'image' | 'pdf'>('image');
   
   // --- ZOOM & PAN STATE ---
   const [viewState, setViewState] = useState({ scale: 1, x: 0, y: 0 });
@@ -150,6 +152,10 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handlePDFImageExtracted = (imageBase64: string) => {
+    setImage(imageBase64);
   };
 
   const handleTranscribe = async () => {
@@ -291,12 +297,51 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
         <div className="flex flex-col gap-4 h-full min-h-0">
             <Card className="flex-1 !p-0 bg-wood-900/10 relative group overflow-hidden flex flex-col border border-wood-800/20">
                 {!image ? (
-                    <div 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex-1 flex flex-col items-center justify-center cursor-pointer hover:bg-wood-900/10 transition-colors"
-                    >
-                        <Icons.Upload className="w-12 h-12 text-wood-800/30 mb-2" />
-                        <p className="font-serif text-wood-800/60">Cargar Facsímil</p>
+                    <div className="flex-1 flex flex-col p-6">
+                        {/* Selector de modo: Imagen o PDF */}
+                        <div className="flex gap-2 mb-4 border-b border-wood-800/20 pb-3">
+                            <button
+                                onClick={() => setUploadMode('image')}
+                                className={`flex-1 py-2 px-4 rounded-lg font-display font-bold text-sm transition-all ${
+                                    uploadMode === 'image'
+                                        ? 'bg-copper-600 text-parchment-100 shadow-md'
+                                        : 'bg-wood-900/10 text-wood-800/60 hover:bg-wood-900/20'
+                                }`}
+                            >
+                                <Icons.Upload className="w-4 h-4 inline mr-2" />
+                                Imagen
+                            </button>
+                            <button
+                                onClick={() => setUploadMode('pdf')}
+                                className={`flex-1 py-2 px-4 rounded-lg font-display font-bold text-sm transition-all ${
+                                    uploadMode === 'pdf'
+                                        ? 'bg-copper-600 text-parchment-100 shadow-md'
+                                        : 'bg-wood-900/10 text-wood-800/60 hover:bg-wood-900/20'
+                                }`}
+                            >
+                                <Icons.File className="w-4 h-4 inline mr-2" />
+                                PDF
+                            </button>
+                        </div>
+
+                        {/* Contenido según el modo */}
+                        {uploadMode === 'image' ? (
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex-1 flex flex-col items-center justify-center cursor-pointer hover:bg-wood-900/10 transition-colors rounded-lg border-2 border-dashed border-wood-800/30"
+                            >
+                                <Icons.Upload className="w-12 h-12 text-wood-800/30 mb-2" />
+                                <p className="font-display font-bold text-wood-900 mb-1">Cargar Imagen</p>
+                                <p className="font-serif text-sm text-wood-800/60">JPG, PNG • Máx. 20MB</p>
+                            </div>
+                        ) : (
+                            <div className="flex-1 overflow-y-auto">
+                                <PDFUploader
+                                    onImageExtracted={handlePDFImageExtracted}
+                                    disabled={isProcessing}
+                                />
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="relative w-full h-full overflow-hidden bg-wood-900/80">
