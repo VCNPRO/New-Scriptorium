@@ -4,6 +4,7 @@ import { Icons } from './Icons';
 import { Manuscript, AnalysisData, VisualAnalysis, RelationMatch } from '../types';
 import { aiService } from '../src/services/apiService';
 import { ManuscriptMap } from './ManuscriptMap';
+import { TableViewer } from './TableViewer';
 
 interface TranscriberProps {
   initialManuscript?: Manuscript;
@@ -431,6 +432,11 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                                 </div>
                             </div>
                         </section>
+
+                        {/* Tablas Extraídas */}
+                        {analysis.extractedTables && analysis.extractedTables.length > 0 && (
+                            <TableViewer tables={analysis.extractedTables} />
+                        )}
 
                         {(analysis.qualityAlerts?.length > 0 || physicalAlert) && (
                             <div className="bg-red-50 border border-red-100 p-3 rounded">

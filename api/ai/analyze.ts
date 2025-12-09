@@ -54,6 +54,7 @@ async function analyzeHandler(req: VercelRequest, res: VercelResponse, auth: any
       - Detecta posibles inconsistencias o errores en el texto (Curación).
       - Extrae eventos históricos.
       - Detecta referencias textuales a OTROS documentos.
+      - SI hay tablas en el texto, extrae los datos en formato estructurado (headers y rows).
 
       Texto: "${text.substring(0, 15000)}"`,
       config: {
@@ -168,6 +169,27 @@ async function analyzeHandler(req: VercelRequest, res: VercelResponse, auth: any
                 properties: {
                   value: { type: Type.STRING },
                   confidence: { type: Type.NUMBER },
+                }
+              }
+            },
+            extractedTables: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  headers: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING }
+                  },
+                  rows: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.ARRAY,
+                      items: { type: Type.STRING }
+                    }
+                  },
+                  confidence: { type: Type.NUMBER }
                 }
               }
             }
