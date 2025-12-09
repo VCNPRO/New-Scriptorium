@@ -1,0 +1,333 @@
+[
+  {
+    "id": "ms-001",
+    "title": "Carta Real de Felipe II - Privilegio Comercial",
+    "transcription": "Don Felipe por la gracia de Dios, Rey de Castilla, de León, de Aragón, de las Dos Sicilias, de Jerusalén, de Navarra, de Granada, de Toledo, de Valencia, de Galicia, de Mallorca, de Sevilla, de Cerdeña, de Córdoba, de Córcega, de Murcia, de Jaén, del Algarve, de Algeciras, de Gibraltar, de las Islas Canarias, de las Indias Orientales y Occidentales, Islas y Tierra Firme del Mar Océano; Archiduque de Austria; Duque de Borgoña, de Brabante y de Milán; Conde de Habsburgo, de Flandes, de Tirol y de Barcelona; Señor de Vizcaya y de Molina. Por cuanto por parte de vos, Juan de Mendoza, vecino de Toledo, nos fue hecha relación que vuestros antepasados han servido lealmente a la Corona en tiempos de guerra y paz, y que deseáis continuar con dicho servicio mediante el comercio de lanas y sedas entre Toledo y Sevilla. Por tanto, haciendo uso de nuestro real privilegio y autoridad, os concedemos licencia perpetua para ejercer el comercio de dichos productos con exención de los siguientes impuestos y aranceles según la tabla adjunta. Mandamos a todos los concejos, justicias, regidores, caballeros, escuderos, oficiales y hombres buenos de las dichas ciudades que guarden y cumplan esta nuestra carta y no vayan contra ella so pena de la nuestra merced. Dada en Madrid, a quince días del mes de agosto, año del nacimiento de Nuestro Señor Jesucristo de mil quinientos cincuenta y seis años.",
+    "translation": "",
+    "imageUrl": "/samples/carta-real-1556.jpg",
+    "analysis": {
+      "summary": {
+        "value": "Carta real otorgada por Felipe II en 1556, concediendo privilegios comerciales a Juan de Mendoza para el comercio de lanas y sedas entre Toledo y Sevilla, con exención de impuestos específicos. Documento de carácter económico y jurídico que reconoce servicios previos a la Corona.",
+        "confidence": 0.94
+      },
+      "titleSuggestion": {
+        "value": "Privilegio real de Felipe II a Juan de Mendoza para comercio de textiles (1556)",
+        "confidence": 0.92
+      },
+      "keywords": [
+        { "value": "Felipe II", "confidence": 0.98 },
+        { "value": "privilegio comercial", "confidence": 0.95 },
+        { "value": "comercio de lanas", "confidence": 0.93 },
+        { "value": "exención de impuestos", "confidence": 0.91 },
+        { "value": "Toledo", "confidence": 0.96 },
+        { "value": "Sevilla", "confidence": 0.94 }
+      ],
+      "entities": {
+        "people": [
+          { "value": "Don Felipe (Felipe II)", "confidence": 0.99 },
+          { "value": "Juan de Mendoza", "confidence": 0.97 }
+        ],
+        "locations": [
+          { "value": "Toledo", "confidence": 0.98 },
+          { "value": "Sevilla", "confidence": 0.97 },
+          { "value": "Madrid", "confidence": 0.96 },
+          { "value": "Castilla", "confidence": 0.94 },
+          { "value": "Aragón", "confidence": 0.93 }
+        ],
+        "dates": [
+          { "value": "15 de agosto de 1556", "confidence": 0.99 },
+          { "value": "año 1556", "confidence": 0.98 }
+        ],
+        "organizations": [
+          { "value": "Corona de Castilla", "confidence": 0.95 },
+          { "value": "Concejos de Toledo", "confidence": 0.88 }
+        ],
+        "events": [
+          { "value": "Concesión de privilegio comercial", "confidence": 0.93 }
+        ]
+      },
+      "typology": {
+        "value": "Carta Real / Real Privilegio",
+        "confidence": 0.96
+      },
+      "scriptType": {
+        "value": "Letra procesal encadenada (siglo XVI)",
+        "confidence": 0.89
+      },
+      "language": {
+        "value": "Español castellano antiguo (siglo XVI)",
+        "confidence": 0.97
+      },
+      "geodata": [
+        {
+          "place": "Toledo",
+          "latitude": 39.8628,
+          "longitude": -4.0273,
+          "type": "origin",
+          "confidence": 0.95
+        },
+        {
+          "place": "Sevilla",
+          "latitude": 37.3891,
+          "longitude": -5.9845,
+          "type": "destination",
+          "confidence": 0.93
+        },
+        {
+          "place": "Madrid",
+          "latitude": 40.4168,
+          "longitude": -3.7038,
+          "type": "mentioned",
+          "confidence": 0.96
+        }
+      ],
+      "suggestedSeries": {
+        "value": "Real Cancillería / Privilegios Reales / Comercio",
+        "confidence": 0.91
+      },
+      "qualityAlerts": [
+        {
+          "value": "Posible falta de sello real en el documento físico (verificar imagen original)",
+          "confidence": 0.72
+        }
+      ],
+      "documentReferences": [],
+      "extractedTables": [
+        {
+          "title": "Tabla de Impuestos y Aranceles Exentos",
+          "headers": ["Producto", "Cantidad Máxima", "Arancel Normal", "Arancel Exento"],
+          "rows": [
+            ["Lana merina", "100 quintales/año", "5% del valor", "0%"],
+            ["Seda cruda", "50 libras/año", "10% del valor", "0%"],
+            ["Paños de Toledo", "200 varas/año", "3% del valor", "0%"]
+          ],
+          "confidence": 0.88
+        }
+      ]
+    },
+    "createdAt": "2025-01-15T10:30:00Z",
+    "status": "completed"
+  },
+  {
+    "id": "ms-002",
+    "title": "Testamento de Doña María de Guzmán",
+    "transcription": "En el nombre de Dios Todopoderoso y de la Virgen María su Madre. Sepan cuantos esta carta de testamento vieren como yo, Doña María de Guzmán, viuda de Don Rodrigo de Silva, vecina de la ciudad de Segovia, estando enferma de cuerpo pero sana de juicio y entendimiento, creyendo firmemente en el misterio de la Santísima Trinidad, Padre, Hijo y Espíritu Santo, tres personas y un solo Dios verdadero, y en todo lo que cree y confiesa la Santa Madre Iglesia Católica Romana, otorgo y conozco que hago y ordeno mi testamento en la forma siguiente: Primeramente, encomiendo mi ánima a Dios Nuestro Señor que la creó y redimió por su preciosa sangre. Mando que mi cuerpo sea sepultado en la iglesia del monasterio de San Vicente de esta ciudad, en la capilla que tengo de mis mayores. Declaro que fui casada legítimamente con el dicho Don Rodrigo de Silva, ya difunto, del cual matrimonio tuve y procreé por mis hijos legítimos a Don Pedro de Silva, Doña Isabel de Silva y Doña Catalina de Silva. Declaro por mis bienes las casas principales que tengo en la calle Real de Segovia, tres huertas en el término de esta ciudad, y cien ducados de renta anual sobre las alcabalas de la villa de Valladolid.",
+    "translation": "",
+    "imageUrl": "/samples/testamento-1588.jpg",
+    "analysis": {
+      "summary": {
+        "value": "Testamento de Doña María de Guzmán, viuda, otorgado en Segovia. Documento privado que establece disposiciones sobre sepultura, declaración de herederos (tres hijos) y relación de bienes inmuebles y rentas.",
+        "confidence": 0.91
+      },
+      "titleSuggestion": {
+        "value": "Testamento de Doña María de Guzmán, viuda de Don Rodrigo de Silva (Segovia)",
+        "confidence": 0.89
+      },
+      "keywords": [
+        { "value": "testamento", "confidence": 0.98 },
+        { "value": "Doña María de Guzmán", "confidence": 0.96 },
+        { "value": "Segovia", "confidence": 0.95 },
+        { "value": "herencia", "confidence": 0.92 },
+        { "value": "bienes inmuebles", "confidence": 0.88 }
+      ],
+      "entities": {
+        "people": [
+          { "value": "Doña María de Guzmán", "confidence": 0.98 },
+          { "value": "Don Rodrigo de Silva", "confidence": 0.96 },
+          { "value": "Don Pedro de Silva", "confidence": 0.94 },
+          { "value": "Doña Isabel de Silva", "confidence": 0.93 },
+          { "value": "Doña Catalina de Silva", "confidence": 0.93 }
+        ],
+        "locations": [
+          { "value": "Segovia", "confidence": 0.97 },
+          { "value": "Valladolid", "confidence": 0.92 },
+          { "value": "Calle Real", "confidence": 0.88 }
+        ],
+        "dates": [],
+        "organizations": [
+          { "value": "Monasterio de San Vicente", "confidence": 0.94 },
+          { "value": "Santa Madre Iglesia Católica Romana", "confidence": 0.96 }
+        ],
+        "events": [
+          { "value": "Otorgamiento de testamento", "confidence": 0.95 }
+        ]
+      },
+      "typology": {
+        "value": "Testamento / Documento notarial privado",
+        "confidence": 0.94
+      },
+      "scriptType": {
+        "value": "Letra humanística (finales del siglo XVI)",
+        "confidence": 0.86
+      },
+      "language": {
+        "value": "Español castellano (siglo XVI)",
+        "confidence": 0.96
+      },
+      "geodata": [
+        {
+          "place": "Segovia",
+          "latitude": 40.9429,
+          "longitude": -4.1088,
+          "type": "origin",
+          "confidence": 0.96
+        },
+        {
+          "place": "Valladolid",
+          "latitude": 41.6523,
+          "longitude": -4.7245,
+          "type": "mentioned",
+          "confidence": 0.91
+        }
+      ],
+      "suggestedSeries": {
+        "value": "Protocolos Notariales / Testamentos y Últimas Voluntades",
+        "confidence": 0.93
+      },
+      "qualityAlerts": [
+        {
+          "value": "Falta fecha exacta del otorgamiento (día, mes, año)",
+          "confidence": 0.88
+        },
+        {
+          "value": "No se menciona escribano público ni testigos (verificar si el documento está completo)",
+          "confidence": 0.82
+        }
+      ],
+      "documentReferences": [],
+      "extractedTables": [
+        {
+          "title": "Relación de Herederos",
+          "headers": ["Nombre", "Relación", "Estado"],
+          "rows": [
+            ["Don Pedro de Silva", "Hijo legítimo", "Heredero forzoso"],
+            ["Doña Isabel de Silva", "Hija legítima", "Heredera forzosa"],
+            ["Doña Catalina de Silva", "Hija legítima", "Heredera forzosa"]
+          ],
+          "confidence": 0.92
+        },
+        {
+          "title": "Inventario de Bienes",
+          "headers": ["Tipo de Bien", "Descripción", "Ubicación"],
+          "rows": [
+            ["Inmueble", "Casas principales", "Calle Real, Segovia"],
+            ["Tierras", "Tres huertas", "Término de Segovia"],
+            ["Rentas", "100 ducados anuales", "Alcabalas de Valladolid"]
+          ],
+          "confidence": 0.89
+        }
+      ]
+    },
+    "createdAt": "2025-01-16T14:20:00Z",
+    "status": "completed"
+  },
+  {
+    "id": "ms-003",
+    "title": "Contrato de Arrendamiento de Tierras - Monasterio de Guadalupe",
+    "transcription": "Sea notorio a todos los que la presente vieren como nos, el Prior y Convento del Real Monasterio de Nuestra Señora de Guadalupe, de la Orden de San Jerónimo, damos en arrendamiento a vos, Miguel Sánchez, labrador vecino de la villa de Guadalupe, una heredad de tierra de labor que el dicho monasterio tiene y posee en el término de esta villa, en el lugar llamado Las Viñas, que linda por el norte con tierras del Concejo, por el sur con el camino real que va a Talavera, por el este con heredad de Pedro González y por el oeste con el arroyo de las Truchas. Dicha heredad contiene aproximadamente veinte fanegas de tierra, poco más o menos. El arrendamiento se hace por tiempo y espacio de seis años cumplidos, que comienzan a correr desde el día de San Miguel del presente año de mil seiscientos y cuatro. El precio del arrendamiento es de treinta fanegas de trigo, bueno, limpio y seco, medido con la medida justa de esta villa, que habéis de dar y pagar al dicho monasterio en cada un año, por el día de Nuestra Señora de Agosto, puestas en la panera del dicho monasterio a vuestra costa. Y os obligáis a labrar y cultivar bien y fielmente la dicha heredad, según buena y sana costumbre de labradores.",
+    "translation": "",
+    "imageUrl": "/samples/contrato-1604.jpg",
+    "analysis": {
+      "summary": {
+        "value": "Contrato de arrendamiento de tierras agrícolas otorgado por el Monasterio de Guadalupe a un labrador local. Especifica linderos, extensión (20 fanegas), duración (6 años desde 1604) y renta anual (30 fanegas de trigo). Documento económico y jurídico típico de la gestión de propiedades monásticas.",
+        "confidence": 0.93
+      },
+      "titleSuggestion": {
+        "value": "Arrendamiento de tierras del Monasterio de Guadalupe a Miguel Sánchez (1604)",
+        "confidence": 0.91
+      },
+      "keywords": [
+        { "value": "arrendamiento", "confidence": 0.97 },
+        { "value": "Monasterio de Guadalupe", "confidence": 0.96 },
+        { "value": "tierras de labor", "confidence": 0.94 },
+        { "value": "renta en especie", "confidence": 0.89 },
+        { "value": "agricultura", "confidence": 0.87 }
+      ],
+      "entities": {
+        "people": [
+          { "value": "Miguel Sánchez (labrador)", "confidence": 0.95 },
+          { "value": "Pedro González", "confidence": 0.88 }
+        ],
+        "locations": [
+          { "value": "Guadalupe", "confidence": 0.98 },
+          { "value": "Lugar de Las Viñas", "confidence": 0.91 },
+          { "value": "Talavera", "confidence": 0.89 },
+          { "value": "Arroyo de las Truchas", "confidence": 0.86 }
+        ],
+        "dates": [
+          { "value": "Día de San Miguel de 1604", "confidence": 0.94 },
+          { "value": "Día de Nuestra Señora de Agosto (15 de agosto)", "confidence": 0.92 }
+        ],
+        "organizations": [
+          { "value": "Real Monasterio de Nuestra Señora de Guadalupe", "confidence": 0.97 },
+          { "value": "Orden de San Jerónimo", "confidence": 0.96 },
+          { "value": "Concejo de Guadalupe", "confidence": 0.89 }
+        ],
+        "events": [
+          { "value": "Arrendamiento de tierras por 6 años", "confidence": 0.94 }
+        ]
+      },
+      "typology": {
+        "value": "Contrato de Arrendamiento / Documento notarial",
+        "confidence": 0.95
+      },
+      "scriptType": {
+        "value": "Letra procesal (principios del siglo XVII)",
+        "confidence": 0.88
+      },
+      "language": {
+        "value": "Español castellano (siglo XVII)",
+        "confidence": 0.96
+      },
+      "geodata": [
+        {
+          "place": "Guadalupe",
+          "latitude": 39.4534,
+          "longitude": -5.3277,
+          "type": "origin",
+          "confidence": 0.97
+        },
+        {
+          "place": "Talavera de la Reina",
+          "latitude": 39.9636,
+          "longitude": -4.8303,
+          "type": "mentioned",
+          "confidence": 0.87
+        }
+      ],
+      "suggestedSeries": {
+        "value": "Protocolos Notariales / Contratos de Arrendamiento / Propiedades Eclesiásticas",
+        "confidence": 0.92
+      },
+      "qualityAlerts": [],
+      "documentReferences": [],
+      "extractedTables": [
+        {
+          "title": "Linderos de la Heredad",
+          "headers": ["Orientación", "Linda con"],
+          "rows": [
+            ["Norte", "Tierras del Concejo"],
+            ["Sur", "Camino real a Talavera"],
+            ["Este", "Heredad de Pedro González"],
+            ["Oeste", "Arroyo de las Truchas"]
+          ],
+          "confidence": 0.94
+        },
+        {
+          "title": "Condiciones del Arrendamiento",
+          "headers": ["Concepto", "Detalle"],
+          "rows": [
+            ["Extensión", "20 fanegas de tierra (aprox.)"],
+            ["Duración", "6 años desde San Miguel 1604"],
+            ["Renta anual", "30 fanegas de trigo"],
+            ["Fecha de pago", "15 de agosto de cada año"],
+            ["Lugar de entrega", "Panera del Monasterio"]
+          ],
+          "confidence": 0.91
+        }
+      ]
+    },
+    "createdAt": "2025-01-17T09:45:00Z",
+    "status": "completed"
+  }
+]
