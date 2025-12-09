@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icons } from './Icons';
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Configurar worker de PDF.js
+// Configurar worker de PDF.js con mejor manejo
 if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  // Usar unpkg como CDN más confiable
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+
+  console.log('PDF.js version:', pdfjsLib.version);
+  console.log('PDF.js worker:', pdfjsLib.GlobalWorkerOptions.workerSrc);
 }
 
 interface PDFUploaderProps {
@@ -20,7 +24,9 @@ export const PDFUploader: React.FC<PDFUploaderProps> = ({ onImageExtracted, disa
   const [previews, setPreviews] = useState<string[]>([]);
 
   const handlePDFUpload = async (file: File) => {
-    if (!file.type.includes('pdf')) {
+    console.log('📄 Iniciando carga de PDF:', file.name, 'Tipo:', file.type, 'Tamaño:', file.size);
+
+    if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
       alert('Por favor, selecciona un archivo PDF válido');
       return;
     }
@@ -30,8 +36,19 @@ export const PDFUploader: React.FC<PDFUploaderProps> = ({ onImageExtracted, disa
     setPdfFile(file);
 
     try {
+      console.log('📖 Leyendo archivo PDF...');
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      console.log('✅ ArrayBuffer leído, tamaño:', arrayBuffer.byteLength, 'bytes');
+
+      console.log('🔍 Cargando documento PDF con pdf.js...');
+      const loadingTask = pdfjsLib.getDocument({
+        data: arrayBuffer,
+        useSystemFonts: true,
+        standardFontDataUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.449/standard_fonts/',
+      });
+
+      const pdf = await loadingTask.promise;
+      console.log('✅ PDF cargado exitosamente, páginas:', pdf.numPages);
 
       if (pdf.numPages > 10) {
         alert('El PDF tiene más de 10 páginas. Por favor, usa un PDF con máximo 10 páginas.');
@@ -43,30 +60,63 @@ export const PDFUploader: React.FC<PDFUploaderProps> = ({ onImageExtracted, disa
       setNumPages(pdf.numPages);
 
       // Generar miniaturas de todas las páginas
+      console.log('🖼️ Generando miniaturas...');
       const thumbnails: string[] = [];
       for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 0.5 });
+        try {
+          console.log(`  📄 Procesando página ${i}/${pdf.numPages}...`);
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 0.5 });
 
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d')!;
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
 
-        await page.render({
-          canvasContext: context,
-          viewport: viewport,
-        }).promise;
+          if (!context) {
+            throw new Error('No se pudo obtener contexto 2D del canvas');
+          }
 
-        thumbnails.push(canvas.toDataURL('image/jpeg', 0.8));
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          await page.render({
+            canvasContext: context,
+            viewport: viewport,
+          }).promise;
+
+          const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
+          thumbnails.push(thumbnail);
+          console.log(`  ✅ Página ${i} procesada`);
+        } catch (pageError) {
+          console.error(`❌ Error en página ${i}:`, pageError);
+          throw pageError;
+        }
       }
 
+      console.log('✅ Todas las miniaturas generadas exitosamente');
       setPreviews(thumbnails);
       setSelectedPage(1);
       setIsProcessing(false);
-    } catch (error) {
-      console.error('Error al procesar PDF:', error);
-      alert('Error al procesar el PDF. Asegúrate de que el archivo no esté dañado.');
+    } catch (error: any) {
+      console.error('❌ Error al procesar PDF:', error);
+      console.error('Detalles del error:', {
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack,
+      });
+
+      let errorMessage = 'Error al procesar el PDF.';
+
+      if (error?.message?.includes('worker')) {
+        errorMessage = 'Error al cargar el procesador de PDF. Por favor, recarga la página e intenta de nuevo.';
+      } else if (error?.message?.includes('Invalid PDF')) {
+        errorMessage = 'El archivo PDF está corrupto o no es válido.';
+      } else if (error?.message?.includes('password')) {
+        errorMessage = 'El PDF está protegido con contraseña. Por favor, usa un PDF sin contraseña.';
+      } else if (error?.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+
+      alert(errorMessage);
       setPdfFile(null);
       setIsProcessing(false);
     }
