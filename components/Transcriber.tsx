@@ -3,6 +3,7 @@ import { Card, Button, Badge } from './ui';
 import { Icons } from './Icons';
 import { Manuscript, AnalysisData, VisualAnalysis, RelationMatch } from '../types';
 import { aiService } from '../src/services/apiService';
+import { ManuscriptMap } from './ManuscriptMap';
 
 interface TranscriberProps {
   initialManuscript?: Manuscript;
@@ -451,6 +452,20 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
 
                 {activeTab === 'geo' && analysis && (
                     <div className="space-y-6 animate-fade-in">
+                        {/* Mapa Interactivo */}
+                        {analysis.geodata && analysis.geodata.length > 0 && (
+                            <div>
+                                <h4 className="text-xs font-bold uppercase text-wood-800/60 mb-3 flex items-center gap-2">
+                                    🗺️ Mapa Histórico Interactivo
+                                </h4>
+                                <ManuscriptMap locations={analysis.geodata} />
+                                <p className="text-xs text-wood-800/50 mt-2 italic text-center">
+                                    Haz click en los marcadores para ver más información
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Lista de Lugares */}
                         <div>
                             <h4 className="text-xs font-bold uppercase text-wood-800/60 mb-2 flex items-center gap-2">
                                 <Icons.Search className="w-3 h-3" /> Geografía Histórica
@@ -458,19 +473,53 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                             {analysis.geodata?.length > 0 ? (
                                 <div className="space-y-2">
                                     {analysis.geodata.map((geo, i) => (
-                                        <div key={i} className="flex items-center justify-between p-2 bg-white/50 border border-wood-800/10 rounded">
-                                            <span className="font-serif font-bold text-wood-900">{geo.place}</span>
-                                            <Badge color={geo.type === 'origin' ? 'copper' : 'wood'}>{geo.type}</Badge>
+                                        <div key={i} className="flex items-center justify-between p-3 bg-white/50 border border-wood-800/10 rounded hover:border-copper-500 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xl">
+                                                    {geo.type === 'origin' && '⚑'}
+                                                    {geo.type === 'destination' && '▶'}
+                                                    {geo.type === 'mentioned' && '●'}
+                                                </span>
+                                                <div>
+                                                    <span className="font-serif font-bold text-wood-900 block">{geo.place}</span>
+                                                    {geo.coordinates && (
+                                                        <span className="text-xs text-wood-800/50">
+                                                            {geo.coordinates.lat.toFixed(4)}, {geo.coordinates.lon.toFixed(4)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <Badge color={geo.type === 'origin' ? 'copper' : geo.type === 'destination' ? 'wood' : 'wood'}>
+                                                {geo.type === 'origin' && 'Origen'}
+                                                {geo.type === 'destination' && 'Destino'}
+                                                {geo.type === 'mentioned' && 'Mencionado'}
+                                            </Badge>
                                         </div>
                                     ))}
                                 </div>
                             ) : <p className="text-sm italic text-wood-800/40">Sin datos geográficos detectados.</p>}
                         </div>
+
+                        {/* Entidades */}
                         <div>
                             <h4 className="text-xs font-bold uppercase text-wood-800/60 mb-2">Entidades (Q2)</h4>
-                            <div className="flex flex-wrap gap-2">
-                                {analysis.entities.people?.map((p, i) => <Badge key={i} color="copper" item={p} />)}
-                                {analysis.entities.organizations?.map((o, i) => <Badge key={i} color="wood" item={o} />)}
+                            <div className="space-y-3">
+                                {analysis.entities.people && analysis.entities.people.length > 0 && (
+                                    <div>
+                                        <p className="text-xs font-bold text-wood-800 mb-1">👤 Personas:</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {analysis.entities.people.map((p, i) => <Badge key={i} color="copper" item={p} />)}
+                                        </div>
+                                    </div>
+                                )}
+                                {analysis.entities.organizations && analysis.entities.organizations.length > 0 && (
+                                    <div>
+                                        <p className="text-xs font-bold text-wood-800 mb-1">🏛️ Organizaciones:</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {analysis.entities.organizations.map((o, i) => <Badge key={i} color="wood" item={o} />)}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
