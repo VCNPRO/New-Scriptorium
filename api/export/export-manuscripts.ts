@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '@vercel/postgres';
-import { requireAuth } from '../lib/auth';
+import { requireAuth, AuthPayload } from '../lib/auth';
 import { ManuscriptDB } from '../lib/db';
 
 // Helper function to escape CSV fields
@@ -61,7 +61,7 @@ async function exportHandler(req: VercelRequest, res: VercelResponse, auth: Auth
 
     const manuscripts = await sql<ManuscriptDB>`
       SELECT * FROM manuscripts
-      WHERE id = ANY(${documentIds}) AND user_id = ${auth.userId}
+      WHERE id = ANY(${JSON.stringify(documentIds)}::text[]) AND user_id = ${auth.userId}
     `;
 
     if (manuscripts.rows.length === 0) {

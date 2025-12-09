@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '@vercel/postgres';
-import { requireAuth } from '../lib/auth';
+import { requireAuth, AuthPayload } from '../lib/auth';
 import { ManuscriptDB } from '../lib/db';
 
 interface AnalysisStats {
@@ -39,7 +39,7 @@ async function statisticsHandler(req: VercelRequest, res: VercelResponse, auth: 
     // Consulta para obtener todos los análisis de los documentos solicitados
     const result = await sql<Pick<ManuscriptDB, 'analysis'>>`
       SELECT analysis FROM manuscripts
-      WHERE id = ANY(${documentIds}) AND user_id = ${auth.userId} AND analysis IS NOT NULL
+      WHERE id = ANY(${JSON.stringify(documentIds)}::text[]) AND user_id = ${auth.userId} AND analysis IS NOT NULL
     `;
 
     const analyses = result.rows.map(row => row.analysis);

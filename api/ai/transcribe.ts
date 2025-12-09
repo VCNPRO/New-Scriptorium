@@ -5,11 +5,6 @@ import { requireAuth, AuthPayload } from '../lib/auth';
 const API_KEY = process.env.GOOGLE_API_KEY;
 
 const transcribeHandler = async (req: VercelRequest, res: VercelResponse, auth: AuthPayload) => {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
-
   // CORS headers for direct frontend-to-API calls if needed
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -19,12 +14,17 @@ const transcribeHandler = async (req: VercelRequest, res: VercelResponse, auth: 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-  
+
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+
   if (!API_KEY) {
     console.error('GOOGLE_API_KEY is not configured.');
     return res.status(500).json({ error: 'Configuration error: Missing API key.' });
   }
-  const ai = new GoogleGenAI(API_KEY);
+  const ai = new GoogleGenAI({ apiKey: API_KEY });
 
   try {
     const { image } = req.body;
@@ -33,7 +33,7 @@ const transcribeHandler = async (req: VercelRequest, res: VercelResponse, auth: 
     }
 
     const cleanBase64 = image.replace(/^data:image\/\w+;base64,/, '');
-    const model = ai.getGenerativeModel({ model: "gemini-pro-vision" });
+    const mimeType = image.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/jpeg';
 
     const prompt = `Actúa como un paleógrafo experto y transcribe el manuscrito "verbatim". Usa [ilegible] si es necesario.
     Devuelve la respuesta en formato JSON con la siguiente estructura (NO uses Markdown, solo JSON raw):
@@ -41,15 +41,25 @@ const transcribeHandler = async (req: VercelRequest, res: VercelResponse, auth: 
       "transcription": "texto..."
     }`;
 
-    const imagePart = {
-      inlineData: {
-        data: cleanBase64,
-        mimeType: "image/jpeg",
-      },
-    };
+    const result = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-exp',
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                data: cleanBase64,
+                mimeType: mimeType,
+              },
+            },
+          ],
+        },
+      ],
+    });
 
-    const result = await model.generateContent([prompt, imagePart]);
-    const responseText = result.response.text();
+    const responseText = result.text;
 
     if (!responseText) {
       throw new Error('AI response was empty.');
