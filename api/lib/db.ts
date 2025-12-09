@@ -151,7 +151,7 @@ export const ManuscriptDB = {
         analysis = COALESCE(${updates.analysis ? JSON.stringify(updates.analysis) : null}, analysis),
         visual_analysis = COALESCE(${updates.visual_analysis ? JSON.stringify(updates.visual_analysis) : null}, visual_analysis),
         status = COALESCE(${updates.status || null}, status),
-        embedding = COALESCE(${updates.embedding || null}, embedding),
+        embedding = COALESCE(${updates.embedding ? JSON.stringify(updates.embedding) : null}, embedding),
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ${id}
       RETURNING *

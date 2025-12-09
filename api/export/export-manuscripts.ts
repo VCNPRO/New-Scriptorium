@@ -38,7 +38,7 @@ const flattenForCsv = (doc: ManuscriptDB) => {
   };
 };
 
-async function exportHandler(req: VercelRequest, res: VercelResponse, auth: any) {
+async function exportHandler(req: VercelRequest, res: VercelResponse, auth: AuthPayload) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -53,7 +53,7 @@ async function exportHandler(req: VercelRequest, res: VercelResponse, auth: any)
   }
 
   try {
-    const { documentIds, format = 'json' } = req.body;
+    const { documentIds, format = 'json' } = req.body as { documentIds: string[], format?: 'json' | 'csv' };
 
     if (!Array.isArray(documentIds) || documentIds.length === 0) {
       return res.status(400).json({ error: 'Se requiere un array de documentIds' });

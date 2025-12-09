@@ -48,15 +48,21 @@ const transcribeHandler = async (req: VercelRequest, res: VercelResponse, auth: 
       }],
     });
     
-    // Vercel se queja de response.text()
-    // const responseText = response.text();
-    const responseText = response.response.candidates[0].content.parts[0].text;
-    
+    const responseText = response.text();
     if (!responseText) {
       throw new Error('La respuesta de la IA estaba vacía.');
     }
-    const json = JSON.parse(responseText);
 
+    let json;
+    try {
+      // La IA a veces devuelve Markdown (` ```json ... ``` `), hay que limpiarlo.
+      const cleanedResponse = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      json = JSON.parse(cleanedResponse);
+    } catch (e) {
+      console.error("Error al parsear JSON de la IA. Respuesta recibida:", responseText);
+      throw new Error("La respuesta de la IA no tenía un formato JSON válido.");
+    }
+    
     console.log(`✅ Transcripción completada para usuario ${auth.email}`);
 
     return res.status(200).json({

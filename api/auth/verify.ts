@@ -37,7 +37,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         email: user.email,
         name: user.name,
         role: user.role,
-        organization: user.organization,
         created_at: user.created_at,
       },
     });

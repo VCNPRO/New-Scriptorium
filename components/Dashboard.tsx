@@ -4,6 +4,7 @@ import { Icons } from './Icons';
 import { Manuscript, RelationMatch } from '../types';
 import { StatisticalAnalysis } from './Dashboard/StatisticalAnalysis';
 import DynamicMap from './Dashboard/InteractiveMap';
+import { ConfidenceDisplay, ConfidenceDot } from './Confidence';
 
 interface DashboardProps {
   recentManuscripts: Manuscript[];

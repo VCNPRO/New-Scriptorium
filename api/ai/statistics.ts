@@ -12,7 +12,7 @@ interface AnalysisStats {
   documentCount: number;
 }
 
-async function statisticsHandler(req: VercelRequest, res: VercelResponse, auth: any) {
+async function statisticsHandler(req: VercelRequest, res: VercelResponse, auth: AuthPayload) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -28,7 +28,7 @@ async function statisticsHandler(req: VercelRequest, res: VercelResponse, auth: 
   }
 
   try {
-    const { documentIds } = req.body;
+    const { documentIds } = req.body as { documentIds: string[] };
 
     if (!Array.isArray(documentIds) || documentIds.length === 0) {
       return res.status(400).json({ error: 'Se requiere un array de documentIds' });

@@ -98,7 +98,7 @@ export function clearAuthCookie(): string {
 }
 
 // Middleware to require authentication
-export function requireAuth(handler: (req: VercelRequest, res: VercelResponse, auth: AuthPayload) => Promise<void>) {
+export function requireAuth(handler: (req: VercelRequest, res: VercelResponse, auth: AuthPayload) => Promise<VercelResponse | void>) {
   return async (req: VercelRequest, res: VercelResponse) => {
     const auth = verifyRequestAuth(req);
     if (!auth) {
@@ -109,7 +109,7 @@ export function requireAuth(handler: (req: VercelRequest, res: VercelResponse, a
 }
 
 // Middleware to require specific role
-export function requireRole(role: string | string[], handler: (req: VercelRequest, res: VercelResponse, auth: AuthPayload) => Promise<void>) {
+export function requireRole(role: string | string[], handler: (req: VercelRequest, res: VercelResponse, auth: AuthPayload) => Promise<VercelResponse | void>) {
   return async (req: VercelRequest, res: VercelResponse) => {
     const auth = verifyRequestAuth(req);
     if (!auth) {

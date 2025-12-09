@@ -132,7 +132,7 @@ export function StatisticalAnalysis({ documentIds, onClose, isOpen }: Statistica
           </button>
         </div>
 
-        {loading && <div className="flex-grow flex justify-center items-center"><Icons.spinner className="w-12 h-12 animate-spin" /></div>}
+        {loading && <div className="flex-grow flex justify-center items-center"><Icons.Spinner className="w-12 h-12 animate-spin" /></div>}
         {error && <div className="flex-grow flex justify-center items-center text-red-500 bg-red-100 p-4 rounded-md">{error}</div>}
 
         {stats && !loading && !error && (
