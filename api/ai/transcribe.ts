@@ -22,20 +22,10 @@ const ai = new GoogleGenAI({ apiKey: API_KEY || '' });
             },
           },
           {
-            text: `Actúa como un paleógrafo experto. Realiza dos tareas:
-            1. Transcribe el manuscrito "verbatim". Usa [ilegible] si es necesario.
-            2. Analiza visualmente el documento para detectar: Sellos, Mapas/Planos, Tablas/Listas estructuradas, Iluminaciones/Dibujos y Estado de conservación.
-
+            text: `Actúa como un paleógrafo experto y transcribe el manuscrito "verbatim". Usa [ilegible] si es necesario.
             Devuelve la respuesta en formato JSON con la siguiente estructura (NO uses Markdown, solo JSON raw):
             {
-              "transcription": "texto...",
-              "visual": {
-                "hasSeals": boolean,
-                "hasMaps": boolean,
-                "hasTables": boolean,
-                "hasIlluminations": boolean,
-                "physicalCondition": "string breve describiendo daños físicos si los hay"
-              }
+              "transcription": "texto..."
             }`
           },
         ],
@@ -50,16 +40,11 @@ const ai = new GoogleGenAI({ apiKey: API_KEY || '' });
 
     console.log(`✅ Transcripción completada para usuario ${auth.email}`);
 
+    // SIMPLIFIED RESPONSE FOR DEBUGGING
     return res.status(200).json({
       success: true,
       text: json.transcription || "",
-      visual: json.visual || {
-        hasSeals: false,
-        hasMaps: false,
-        hasTables: false,
-        hasIlluminations: false,
-        physicalCondition: "Normal"
-      }
+      visual: null // Return null for visual analysis during debug
     });
   } catch (error: any) {
     console.error('❌ Error en transcripción:', error);
