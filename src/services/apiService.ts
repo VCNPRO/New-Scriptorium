@@ -26,7 +26,7 @@ export const aiService = {
   async transcribe(imageBase64: string) {
     return authenticatedFetch(`${API_BASE}/ai/transcribe`, {
       method: 'POST',
-      body: JSON.stringify({ imageBase64 }),
+      body: JSON.stringify({ image: imageBase64 }),
     });
   },
 
