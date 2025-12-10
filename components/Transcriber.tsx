@@ -430,7 +430,7 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                 <TabButton id="relations" icon={Icons.Library} label="Relaciones" alert={relations.length || undefined} />
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 bg-parchment-100">
+            <div className="flex-1 overflow-y-auto p-6 bg-parchment-100" style={{ maxHeight: 'calc(100vh - 16rem)', overflowY: 'auto' }}>
                 
                 {activeTab === 'transcript' && (
                     <div className="space-y-4">
@@ -441,18 +441,23 @@ export const Transcriber: React.FC<TranscriberProps> = ({ initialManuscript, exi
                                 {translatedText ? "Actualizar Traducción" : "Traducir (Q14)"}
                             </Button>
                         </div>
-                        <textarea 
+                        <textarea
                             value={text}
                             onChange={(e) => setText(e.target.value)}
                             placeholder="El texto transcrito aparecerá aquí..."
-                            className="w-full min-h-[300px] p-4 bg-parchment-200/50 border-none resize-y focus:ring-0 font-script text-xl leading-relaxed text-wood-900"
+                            className="w-full min-h-[200px] max-h-[300px] p-4 bg-parchment-200/50 border border-wood-800/20 resize-y focus:ring-2 focus:ring-copper-500 font-script text-xl leading-relaxed text-wood-900 rounded"
                         />
                         {translatedText && (
-                            <div className="mt-6 pt-6 border-t border-wood-800/10 animate-fade-in">
-                                <h3 className="font-display font-bold text-wood-900 mb-2">Traducción Accesible (Q14)</h3>
-                                <p className="font-serif text-wood-800 leading-relaxed bg-white/40 p-4 rounded text-sm">
-                                    {translatedText}
-                                </p>
+                            <div className="mt-6 pt-6 border-t-2 border-copper-600/20 animate-fade-in">
+                                <h3 className="font-display font-bold text-wood-900 mb-3 text-lg flex items-center gap-2">
+                                    <Icons.AI className="w-5 h-5 text-copper-600" />
+                                    Traducción Accesible (Q14)
+                                </h3>
+                                <div className="bg-white/60 border-2 border-copper-600/20 p-6 rounded-lg shadow-md max-h-[400px] overflow-y-auto">
+                                    <p className="font-serif text-wood-800 leading-relaxed text-base whitespace-pre-wrap">
+                                        {translatedText}
+                                    </p>
+                                </div>
                             </div>
                         )}
                     </div>
