@@ -274,49 +274,91 @@ export const ExportManuscript: React.FC<ExportManuscriptProps> = ({ manuscript }
       let yPosition = pageHeight - margin;
       let currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
 
-      const addText = (text: string, fontSize: number, font: any, color = rgb(0, 0, 0), isBold = false) => {
-        const lines = wrapText(text, maxWidth, fontSize, font);
+      // Función para sanitizar texto y remover caracteres problemáticos
+      const sanitizeText = (text: string): string => {
+        if (!text) return '';
+        // Remover caracteres que pdf-lib no puede manejar
+        return text
+          .replace(/[\u0000-\u0008\u000B-\u000C\u000E-\u001F\u007F-\u009F]/g, '')
+          .replace(/[\u2018\u2019]/g, "'") // Comillas curvas simples
+          .replace(/[\u201C\u201D]/g, '"') // Comillas curvas dobles
+          .replace(/\u2026/g, '...') // Elipsis
+          .replace(/[\u2013\u2014]/g, '-') // Guiones largos
+          .trim();
+      };
+
+      const addText = (text: string, fontSize: number, font: any, color = rgb(0, 0, 0)) => {
+        if (!text || text.trim() === '') return;
+
+        const sanitized = sanitizeText(text);
+        if (!sanitized) return;
+
+        const lines = wrapText(sanitized, maxWidth, fontSize, font);
 
         for (const line of lines) {
+          if (!line || line.trim() === '') continue;
+
           if (yPosition < margin + 50) {
             currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
             yPosition = pageHeight - margin;
           }
 
-          currentPage.drawText(line, {
-            x: margin,
-            y: yPosition,
-            size: fontSize,
-            font: font,
-            color: color,
-          });
+          try {
+            currentPage.drawText(line, {
+              x: margin,
+              y: yPosition,
+              size: fontSize,
+              font: font,
+              color: color,
+            });
+          } catch (err) {
+            console.warn('Error dibujando línea, omitiendo:', err);
+          }
 
           yPosition -= fontSize + 4;
         }
       };
 
       const wrapText = (text: string, maxWidth: number, fontSize: number, font: any): string[] => {
-        const words = text.split(' ');
-        const lines: string[] = [];
-        let currentLine = '';
+        if (!text) return [];
 
-        for (const word of words) {
-          const testLine = currentLine ? `${currentLine} ${word}` : word;
-          const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+        const allLines: string[] = [];
+        // Primero dividir por saltos de línea
+        const paragraphs = text.split(/\r?\n/);
 
-          if (testWidth > maxWidth && currentLine) {
-            lines.push(currentLine);
-            currentLine = word;
-          } else {
-            currentLine = testLine;
+        for (const paragraph of paragraphs) {
+          if (!paragraph || paragraph.trim() === '') {
+            allLines.push('');
+            continue;
+          }
+
+          const words = paragraph.split(' ');
+          let currentLine = '';
+
+          for (const word of words) {
+            const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+            try {
+              const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+              if (testWidth > maxWidth && currentLine) {
+                allLines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            } catch (err) {
+              // Si hay error calculando ancho, agregar la palabra de todos modos
+              currentLine = testLine;
+            }
+          }
+
+          if (currentLine) {
+            allLines.push(currentLine);
           }
         }
 
-        if (currentLine) {
-          lines.push(currentLine);
-        }
-
-        return lines;
+        return allLines;
       };
 
       const addSection = (title: string) => {
@@ -326,7 +368,7 @@ export const ExportManuscript: React.FC<ExportManuscriptProps> = ({ manuscript }
       };
 
       // Título principal
-      addText(manuscript.title, 20, timesRomanBold, rgb(0.3, 0.1, 0));
+      addText(manuscript.title || 'Documento Sin Título', 20, timesRomanBold, rgb(0.3, 0.1, 0));
       yPosition -= 15;
 
       // Metadatos
@@ -348,12 +390,14 @@ export const ExportManuscript: React.FC<ExportManuscriptProps> = ({ manuscript }
       }
 
       // Transcripción
-      addSection('Transcripción');
-      addText(manuscript.transcription, 11, timesRomanFont);
+      if (manuscript.transcription && manuscript.transcription.trim()) {
+        addSection('Transcripcion');
+        addText(manuscript.transcription, 11, timesRomanFont);
+      }
 
       // Traducción
-      if (manuscript.translation) {
-        addSection('Traducción');
+      if (manuscript.translation && manuscript.translation.trim()) {
+        addSection('Traduccion');
         addText(manuscript.translation, 11, timesRomanFont);
       }
 
@@ -375,21 +419,27 @@ export const ExportManuscript: React.FC<ExportManuscriptProps> = ({ manuscript }
         if (manuscript.analysis.entities.people?.length > 0) {
           addSection('Personas');
           manuscript.analysis.entities.people.forEach((p) => {
-            addText(`• ${p.value} (${(p.confidence * 100).toFixed(0)}%)`, 11, timesRomanFont);
+            if (p.value) {
+              addText(`${p.value} (${(p.confidence * 100).toFixed(0)}%)`, 11, timesRomanFont);
+            }
           });
         }
 
         if (manuscript.analysis.entities.locations?.length > 0) {
           addSection('Lugares');
           manuscript.analysis.entities.locations.forEach((l) => {
-            addText(`• ${l.value} (${(l.confidence * 100).toFixed(0)}%)`, 11, timesRomanFont);
+            if (l.value) {
+              addText(`${l.value} (${(l.confidence * 100).toFixed(0)}%)`, 11, timesRomanFont);
+            }
           });
         }
 
         if (manuscript.analysis.entities.dates?.length > 0) {
           addSection('Fechas');
           manuscript.analysis.entities.dates.forEach((d) => {
-            addText(`• ${d.value} (${(d.confidence * 100).toFixed(0)}%)`, 11, timesRomanFont);
+            if (d.value) {
+              addText(`${d.value} (${(d.confidence * 100).toFixed(0)}%)`, 11, timesRomanFont);
+            }
           });
         }
       }
