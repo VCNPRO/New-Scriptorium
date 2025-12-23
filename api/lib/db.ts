@@ -28,6 +28,18 @@ export interface ManuscriptDB {
   updated_at: Date;
 }
 
+export interface AuditLog {
+  id: string;
+  manuscript_id: string | null;
+  user_id: string | null;
+  action: string;
+  timestamp: Date;
+  ip_address: string | null;
+  user_agent: string | null;
+  changes: any; // JSON
+  metadata: any; // JSON
+}
+
 // User Database Operations
 export const UserDB = {
   async create(email: string, passwordHash: string, name: string, role: string = 'user') {
@@ -179,6 +191,154 @@ export const ManuscriptDB = {
   }
 };
 
+// Audit Log Database Operations
+export const AuditDB = {
+  async create(data: {
+    manuscript_id?: string | null;
+    user_id?: string | null;
+    action: string;
+    ip_address?: string | null;
+    user_agent?: string | null;
+    changes?: any;
+    metadata?: any;
+  }) {
+    const result = await sql<AuditLog>`
+      INSERT INTO audit_logs (
+        manuscript_id, user_id, action, ip_address, user_agent, changes, metadata
+      )
+      VALUES (
+        ${data.manuscript_id || null},
+        ${data.user_id || null},
+        ${data.action},
+        ${data.ip_address || null},
+        ${data.user_agent || null},
+        ${JSON.stringify(data.changes || {})},
+        ${JSON.stringify(data.metadata || {})}
+      )
+      RETURNING *
+    `;
+    return result.rows[0];
+  },
+
+  async findByManuscriptId(manuscriptId: string, limit: number = 50) {
+    const result = await sql<AuditLog>`
+      SELECT * FROM audit_logs
+      WHERE manuscript_id = ${manuscriptId}
+      ORDER BY timestamp DESC
+      LIMIT ${limit}
+    `;
+    return result.rows;
+  },
+
+  async findByUserId(userId: string, limit: number = 100, offset: number = 0) {
+    const result = await sql<AuditLog>`
+      SELECT * FROM audit_logs
+      WHERE user_id = ${userId}
+      ORDER BY timestamp DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+    return result.rows;
+  },
+
+  async findRecent(limit: number = 100, userId?: string) {
+    if (userId) {
+      const result = await sql<AuditLog>`
+        SELECT al.*, u.name as user_name, u.email as user_email, m.title as manuscript_title
+        FROM audit_logs al
+        LEFT JOIN users u ON al.user_id = u.id
+        LEFT JOIN manuscripts m ON al.manuscript_id = m.id
+        WHERE al.user_id = ${userId} OR m.user_id = ${userId}
+        ORDER BY al.timestamp DESC
+        LIMIT ${limit}
+      `;
+      return result.rows;
+    } else {
+      const result = await sql<AuditLog>`
+        SELECT al.*, u.name as user_name, u.email as user_email, m.title as manuscript_title
+        FROM audit_logs al
+        LEFT JOIN users u ON al.user_id = u.id
+        LEFT JOIN manuscripts m ON al.manuscript_id = m.id
+        ORDER BY al.timestamp DESC
+        LIMIT ${limit}
+      `;
+      return result.rows;
+    }
+  },
+
+  async findByAction(action: string, limit: number = 50) {
+    const result = await sql<AuditLog>`
+      SELECT * FROM audit_logs
+      WHERE action = ${action}
+      ORDER BY timestamp DESC
+      LIMIT ${limit}
+    `;
+    return result.rows;
+  },
+
+  async findByDateRange(startDate: Date, endDate: Date, userId?: string) {
+    if (userId) {
+      const result = await sql<AuditLog>`
+        SELECT al.*, u.name as user_name, m.title as manuscript_title
+        FROM audit_logs al
+        LEFT JOIN users u ON al.user_id = u.id
+        LEFT JOIN manuscripts m ON al.manuscript_id = m.id
+        WHERE al.timestamp >= ${startDate.toISOString()}
+          AND al.timestamp <= ${endDate.toISOString()}
+          AND (al.user_id = ${userId} OR m.user_id = ${userId})
+        ORDER BY al.timestamp DESC
+      `;
+      return result.rows;
+    } else {
+      const result = await sql<AuditLog>`
+        SELECT al.*, u.name as user_name, m.title as manuscript_title
+        FROM audit_logs al
+        LEFT JOIN users u ON al.user_id = u.id
+        LEFT JOIN manuscripts m ON al.manuscript_id = m.id
+        WHERE al.timestamp >= ${startDate.toISOString()}
+          AND al.timestamp <= ${endDate.toISOString()}
+        ORDER BY al.timestamp DESC
+      `;
+      return result.rows;
+    }
+  },
+
+  async getStatistics(userId?: string) {
+    const stats: any = {};
+
+    if (userId) {
+      const totalResult = await sql`
+        SELECT COUNT(*) as total FROM audit_logs
+        WHERE user_id = ${userId}
+      `;
+      stats.total = parseInt(totalResult.rows[0].total);
+
+      const actionStatsResult = await sql`
+        SELECT action, COUNT(*) as count
+        FROM audit_logs
+        WHERE user_id = ${userId}
+        GROUP BY action
+        ORDER BY count DESC
+      `;
+      stats.byAction = actionStatsResult.rows;
+    } else {
+      const totalResult = await sql`
+        SELECT COUNT(*) as total FROM audit_logs
+      `;
+      stats.total = parseInt(totalResult.rows[0].total);
+
+      const actionStatsResult = await sql`
+        SELECT action, COUNT(*) as count
+        FROM audit_logs
+        GROUP BY action
+        ORDER BY count DESC
+      `;
+      stats.byAction = actionStatsResult.rows;
+    }
+
+    return stats;
+  }
+};
+
 // Initialize database tables (run once)
 export async function initDB() {
   try {
@@ -229,6 +389,27 @@ export async function initDB() {
     } catch (e) {
       console.warn('pgvector extension not available, semantic search will be limited');
     }
+
+    // Create audit_logs table
+    await sql`
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        manuscript_id UUID REFERENCES manuscripts(id) ON DELETE CASCADE,
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        action VARCHAR(100) NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        ip_address VARCHAR(45),
+        user_agent TEXT,
+        changes JSONB,
+        metadata JSONB
+      )
+    `;
+
+    // Create indexes for audit_logs
+    await sql`CREATE INDEX IF NOT EXISTS idx_audit_manuscript_id ON audit_logs(manuscript_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_audit_user_id ON audit_logs(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_logs(timestamp DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_logs(action)`;
 
     console.log('✅ Database initialized successfully');
     return true;

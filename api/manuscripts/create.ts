@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ManuscriptDB } from '../lib/db';
 import { requireAuth } from '../lib/auth';
+import { logAudit, AuditActions } from '../lib/audit';
 
 async function createManuscriptHandler(req: VercelRequest, res: VercelResponse, auth: any) {
   // CORS headers
@@ -31,6 +32,21 @@ async function createManuscriptHandler(req: VercelRequest, res: VercelResponse, 
       transcription,
       analysis,
       visual_analysis: visualAnalysis
+    });
+
+    // Log audit event
+    await logAudit({
+      action: AuditActions.DOCUMENT_UPLOAD,
+      userId: auth.userId,
+      manuscriptId: manuscript.id,
+      metadata: {
+        title: manuscript.title,
+        imageSize: imageUrl.length,
+        transcriptionLength: transcription.length,
+        hasAnalysis: !!analysis,
+        hasVisualAnalysis: !!visualAnalysis,
+      },
+      req,
     });
 
     return res.status(201).json({
