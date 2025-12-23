@@ -260,6 +260,102 @@ export const ExportManuscript: React.FC<ExportManuscriptProps> = ({ manuscript }
     }
   };
 
+  const exportToPDFA = async () => {
+    setIsExporting(true);
+    try {
+      const response = await fetch('/api/export/preservation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          manuscript,
+          format: 'pdfa'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al generar PDF/A');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${manuscript.title.replace(/[^a-z0-9]/gi, '_')}_PDFA.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Error exportando a PDF/A:', error);
+      alert('Error al exportar el manuscrito a PDF/A');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const exportToMETS = async () => {
+    setIsExporting(true);
+    try {
+      const response = await fetch('/api/export/preservation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          manuscript,
+          format: 'mets'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al generar METS/XML');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${manuscript.title.replace(/[^a-z0-9]/gi, '_')}_METS.xml`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Error exportando a METS:', error);
+      alert('Error al exportar el manuscrito a METS/XML');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const exportOriginalImage = () => {
+    setIsExporting(true);
+    try {
+      const link = document.createElement('a');
+      link.href = manuscript.imageUrl;
+      link.download = `${manuscript.title.replace(/[^a-z0-9]/gi, '_')}_ORIGINAL.jpg`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Error descargando imagen original:', error);
+      alert('Error al descargar la imagen original');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const exportToPDF = async () => {
     setIsExporting(true);
     try {
@@ -499,7 +595,10 @@ export const ExportManuscript: React.FC<ExportManuscriptProps> = ({ manuscript }
           </div>
 
           <div className="p-2">
+            {/* FORMATOS ESTÁNDAR */}
             <div className="border-b-2 border-copper-600/20 mb-2 pb-2">
+              <p className="text-xs font-display font-bold text-wood-800/50 px-3 mb-2">FORMATOS ESTÁNDAR</p>
+
               <button
                 onClick={() => {
                   setShowPDFPreview(true);
@@ -521,6 +620,46 @@ export const ExportManuscript: React.FC<ExportManuscriptProps> = ({ manuscript }
                 <div className="flex-1">
                   <p className="font-display font-bold text-sm text-wood-900">PDF - Descargar Directo</p>
                   <p className="text-xs text-wood-800/60">Sin vista previa</p>
+                </div>
+              </button>
+            </div>
+
+            {/* FORMATOS DE PRESERVACIÓN */}
+            <div className="border-b-2 border-green-600/20 mb-2 pb-2 bg-green-50/30">
+              <p className="text-xs font-display font-bold text-green-800 px-3 mb-2 flex items-center gap-1">
+                ⭐ PRESERVACIÓN ARCHIVÍSTICA
+              </p>
+
+              <button
+                onClick={exportToPDFA}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded hover:bg-green-100 transition-colors text-left mb-1"
+              >
+                <Icons.File className="w-4 h-4 text-green-700" />
+                <div className="flex-1">
+                  <p className="font-display font-bold text-sm text-wood-900">PDF/A-2 (ISO 19005-2)</p>
+                  <p className="text-xs text-wood-800/60">Estándar de archivo a largo plazo</p>
+                </div>
+              </button>
+
+              <button
+                onClick={exportToMETS}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded hover:bg-green-100 transition-colors text-left mb-1"
+              >
+                <Icons.File className="w-4 h-4 text-green-700" />
+                <div className="flex-1">
+                  <p className="font-display font-bold text-sm text-wood-900">METS/XML</p>
+                  <p className="text-xs text-wood-800/60">Metadatos para bibliotecas digitales</p>
+                </div>
+              </button>
+
+              <button
+                onClick={exportOriginalImage}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded hover:bg-green-100 transition-colors text-left"
+              >
+                <Icons.File className="w-4 h-4 text-green-700" />
+                <div className="flex-1">
+                  <p className="font-display font-bold text-sm text-wood-900">Imagen Original (Alta Calidad)</p>
+                  <p className="text-xs text-wood-800/60">Descarga la imagen sin procesar</p>
                 </div>
               </button>
             </div>
